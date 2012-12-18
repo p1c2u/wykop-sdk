@@ -269,6 +269,14 @@ class WykopAPI:
         return self.request('links', 'upcoming',
                             api_params=api_params)
 
+    # Popular
+    
+    def get_popular_promoted(self):
+        return self.request('popular', 'promoted',)
+
+    def get_popular_upcoming(self):
+        return self.request('popular', 'upcoming')
+
     # Profile
 
     def get_profile(self, username):

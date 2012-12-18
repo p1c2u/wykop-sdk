@@ -66,6 +66,12 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 | Promoted     | get_links_promoted     | 
 +--------------+------------------------+ 
 | Upcoming     | get_links_upcoming     | 
++--------------+------------------------+
+| **Popular**                           | 
++--------------+------------------------+ 
+| Promoted     | get_popular_promoted   | 
++--------------+------------------------+ 
+| Upcoming     | get_popular_upcoming   | 
 +--------------+------------------------+ 
 | **Profile**                           | 
 +--------------+------------------------+ 
