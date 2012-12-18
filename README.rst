@@ -60,6 +60,12 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 | Observe      | observe_link           | 
 +--------------+------------------------+ 
 | Favorite     | favorite_link          | 
++--------------+------------------------+
+| **Links**                             | 
++--------------+------------------------+ 
+| Promoted     | get_links_promoted     | 
++--------------+------------------------+ 
+| Upcoming     | get_links_upcoming     | 
 +--------------+------------------------+ 
 | **Profile**                           | 
 +--------------+------------------------+ 

@@ -257,13 +257,27 @@ class WykopAPI:
     def favorite_link(self, link_id):
         return self.request('link', 'favorite', [link_id])
 
+    # Links
+    
+    def get_links_promoted(self, page=1, sort='day'):
+        api_params = {'appkey': self.appkey, 'page': page, 'sort': sort}
+        return self.request('links', 'promoted',
+                            api_params=api_params)
+
+    def get_links_upcoming(self, page=1, sort='date'):
+        api_params = {'appkey': self.appkey, 'page': page, 'sort': sort}
+        return self.request('links', 'upcoming',
+                            api_params=api_params)
+
     # Profile
 
     def get_profile(self, username):
         return self.request('profile', 'index', [username])
 
     def get_profile_links(self, username, page=1):
-        return self.request('profile', 'added', [username, page])
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'added', [username],
+                            api_params=api_params)
 
     # User
 
