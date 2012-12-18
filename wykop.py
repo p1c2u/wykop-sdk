@@ -3,6 +3,7 @@ Created on 18-12-2012
 
 @author: maciag.artur
 '''
+import logging
 import urlparse
 import urllib
 import urllib2
@@ -11,6 +12,18 @@ except ImportError: import json
 
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
+
+def login_requred(method):
+    def decorator(self, *args, **kwargs):
+        if not self.userkey:
+            self._get_new_userkey()
+        try:
+            return method(self, *args, **kwargs)
+        # get new userey on invalid key
+        except InvalidUserKeyError:
+            self._get_new_userkey()
+            return method(self, *args, **kwargs)
+    return decorator
 
 class WykopAPIError(Exception):
     def __init__(self, type, message):
@@ -134,27 +147,37 @@ class WykopAPI:
     _domain = "a.wykop.pl"
     
     def __init__(self, appkey, login=None, accountkey=None):
+        self.logger = logging.getLogger("wykop.WykopAPI")
         self.appkey = appkey
         self.login = login
         self.accountkey = accountkey
-        self.userkey = None
+        self.userkey = ''
 
-    def request(self, rtype, rmethod, rmethod_params=(), api_params={}, post_params={}):
+    def _construct_url(self, rtype, rmethod, rmethod_params=(), api_params={}):
+        pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
+        path = "/".join(pathparts)
+        urlparts = (self._protocol, self._domain,  path, '', '', '')
+        return urlparse.urlunparse(urlparts)
+
+    def _get_new_userkey(self):
+        res = self.user_login()
+        self.userkey = res['userkey']
+
+    def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}):
+        self.logger.debug("Making request")
         # map all params to string
         rmethod_params = tuple(map(str, rmethod_params))
         # appkey is default for api_params
-        api_params = api_params or {'appkey': self.appkey}
-        params = paramsencode(api_params)
-        pathparts = (rtype, rmethod) + rmethod_params + (params,)
-        path = "/".join(pathparts)
-        urlparts = (self._protocol, self._domain,  path, '', '', '')
-        url = urlparse.urlunparse(urlparts)
+        api_params = api_params or {'appkey': self.appkey, 'userkey': self.userkey}
+        api_params = paramsencode(api_params)
+        
+        url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
+        self.logger.debug(" Fetch url: %s" % str(url))
         
         try:
             f = urllib2.urlopen(url, urllib.urlencode(post_params))
         except urllib2.HTTPError, e:
-            response = json.loads(e.read())
-            raise WykopAPIError(response)
+            raise WykopAPIError(0, "Unnown request error")
         
         try:
             response = json.loads(f.read())
@@ -166,12 +189,72 @@ class WykopAPI:
             f.close()
         return response
 
+    # Comments
+
+    @login_requred
+    def add_comment(self, link_id, comment_id, body, embed=None):
+        post_params = {'body': body}
+        if embed:
+            post_params.update({'embed': embed})
+        return self.request('comments', 'add', [link_id, comment_id], 
+                            post_params=post_params)
+
+    @login_requred
+    def plus_comment(self, link_id, comment_id):
+        return self.request('comments', 'plus', [link_id, comment_id])
+
+    @login_requred
+    def minus_comment(self, link_id, comment_id):
+        return self.request('comments', 'minus', [link_id, comment_id])
+
+    @login_requred
+    def edit_comment(self, comment_id, body):
+        post_params = {'body': body}
+        return self.request('comments', 'edit', [comment_id],
+                            post_params=post_params)
+
+    @login_requred
+    def delete_comment(self, comment_id):
+        return self.request('comments', 'delete', [comment_id])
+
+    # Link
+
+    def get_link(self, link_id):
+        return self.request('link', 'index', [link_id])
+
+    @login_requred
+    def dig_link(self, link_id):
+        return self.request('link', 'dig', [link_id])
+
+    @login_requred
+    def cancel_link(self, link_id):
+        return self.request('link', 'cancel', [link_id])
+
+    @login_requred
+    def bury_link(self, link_id, bury_id):
+        return self.request('link', 'bury', [link_id, bury_id])
+
+    # Profile
+
     def get_profile(self, username):
-        return self.request('profile', 'index', (username,))
+        return self.request('profile', 'index', [username])
 
     def get_profile_links(self, username, page=1):
-        return self.request('profile', 'added', (username, page))
+        return self.request('profile', 'added', [username, page])
+
+    # User
 
     def user_login(self):
-        params = {'login': self.login, 'accountkey': self.accountkey}
-        return self.request('user', 'login', post_params=params)
+        post_params = {'login': self.login, 'accountkey': self.accountkey}
+        return self.request('user', 'login', 
+                            post_params=post_params)
+
+    # Entries
+
+    @login_requred
+    def add_entry(self, body, embed=None):
+        post_params = {'body': body}
+        if embed:
+            post_params.update({'embed': embed})
+        return self.request('entries', 'add', 
+                            post_params=post_params)
