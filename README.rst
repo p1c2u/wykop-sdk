@@ -1,5 +1,5 @@
 Wykop API Python SDK
-=========
+====================
 
 Biblioteka ta jest implementacją `Wykop API`_ w Python.
 
@@ -15,21 +15,21 @@ Przykładowe użycie:
     profile = api.get_profile("m__b")
 
 Zdefiniowane metody 
------------------
+-------------------
 
 Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 
 +--------------+-------------------+ 
 | Metoda API   | Metoda SDK        | 
 +==============+===================+ 
-| Profile                          | 
-+==============+===================+ 
+| **Profile**                      | 
++--------------+-------------------+ 
 | Index        | get_profile       | 
 +--------------+-------------------+ 
 | Added        | get_profile_links |
 +--------------+-------------------+ 
-| User                             | 
-+==============+===================+ 
+| **User**                         | 
++--------------+-------------------+ 
 | Login        | user_login        | 
 +--------------+-------------------+ 
 
@@ -54,4 +54,4 @@ Zgłaszanie błędów
 
 Jeżeli znalazłeś jakieś błędy lub masz inny problem zgłoś go na `bugtracker`_
 
-.. _Wykop API Python SDK bugtracker: https://github.com/p1c2u/wykop-sdk/issues
+.. _bugtracker: https://github.com/p1c2u/wykop-sdk/issues
