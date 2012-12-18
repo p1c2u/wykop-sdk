@@ -44,10 +44,15 @@ Można również skorzystać z podstawowej metody do tworzenia żądań. Przykł
 
 gdzie:
 
-'link'              typ zasobu
-'index'             metoda zasobu
-[54321,]            lista parametrów metody
-{"appkey": 12345}   parametry API
++-------------------+-------------------------+  
+| 'link'            | typ zasobu              | 
++-------------------+-------------------------+ 
+| 'index'           | metoda zasobu           | 
++-------------------+-------------------------+ 
+| [54321,]          | lista parametrów metody | 
++-------------------+-------------------------+ 
+| {"appkey": 12345} | parametry API           | 
++-------------------+-------------------------+ 
 
 Zgłaszanie błędów
 -----------------
