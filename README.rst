@@ -9,7 +9,7 @@ Przykładowe użycie:
 
 ::
 
-	import wykop
+    import wykop
 
     api = wykop.WykopAPI(appkey)
     profile = api.get_profile("m__b")
@@ -40,7 +40,7 @@ Można również skorzystać z podstawowej metody do tworzenia żądań. Przykł
 
 ::
 
-	link = api.request("link", 'index', [54321,], {"appkey": 12345})
+    link = api.request("link", 'index', [54321,], {"appkey": 12345})
 
 gdzie:
 
