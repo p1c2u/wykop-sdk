@@ -47,19 +47,19 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Bury         | bury_link              | 
 +--------------+------------------------+ 
-| Comments     | *get_link_comments*    | 
+| Comments     | get_link_comments      | 
 +--------------+------------------------+ 
-| Reports      | *get_link_reports*     | 
+| Reports      | get_link_reports       | 
 +--------------+------------------------+ 
-| Digs         | *get_link_digs*        | 
+| Digs         | get_link_digs          | 
 +--------------+------------------------+ 
-| Related      | *get_link_related*     | 
+| Related      | get_link_related       | 
 +--------------+------------------------+ 
-| Buryreasons  | *get_link_buryreasons* | 
+| Buryreasons  | get_link_buryreasons   | 
 +--------------+------------------------+ 
-| Observe      | *observe_link*         | 
+| Observe      | observe_link           | 
 +--------------+------------------------+ 
-| Favorite     | *favorite_link*        | 
+| Favorite     | favorite_link          | 
 +--------------+------------------------+ 
 | **Profile**                           | 
 +--------------+------------------------+ 

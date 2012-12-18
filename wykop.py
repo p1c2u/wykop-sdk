@@ -13,13 +13,13 @@ except ImportError: import json
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
 
-def login_requred(method):
+def login_required(method):
     def decorator(self, *args, **kwargs):
         if not self.userkey:
             self._get_new_userkey()
         try:
             return method(self, *args, **kwargs)
-        # get new userey on invalid key
+        # get new userkey on invalid key
         except InvalidUserKeyError:
             self._get_new_userkey()
             return method(self, *args, **kwargs)
@@ -191,7 +191,7 @@ class WykopAPI:
 
     # Comments
 
-    @login_requred
+    @login_required
     def add_comment(self, link_id, comment_id, body, embed=None):
         post_params = {'body': body}
         if embed:
@@ -199,21 +199,21 @@ class WykopAPI:
         return self.request('comments', 'add', [link_id, comment_id], 
                             post_params=post_params)
 
-    @login_requred
+    @login_required
     def plus_comment(self, link_id, comment_id):
         return self.request('comments', 'plus', [link_id, comment_id])
 
-    @login_requred
+    @login_required
     def minus_comment(self, link_id, comment_id):
         return self.request('comments', 'minus', [link_id, comment_id])
 
-    @login_requred
+    @login_required
     def edit_comment(self, comment_id, body):
         post_params = {'body': body}
         return self.request('comments', 'edit', [comment_id],
                             post_params=post_params)
 
-    @login_requred
+    @login_required
     def delete_comment(self, comment_id):
         return self.request('comments', 'delete', [comment_id])
 
@@ -222,17 +222,40 @@ class WykopAPI:
     def get_link(self, link_id):
         return self.request('link', 'index', [link_id])
 
-    @login_requred
+    @login_required
     def dig_link(self, link_id):
         return self.request('link', 'dig', [link_id])
 
-    @login_requred
+    @login_required
     def cancel_link(self, link_id):
         return self.request('link', 'cancel', [link_id])
 
-    @login_requred
+    @login_required
     def bury_link(self, link_id, bury_id):
         return self.request('link', 'bury', [link_id, bury_id])
+
+    def get_link_comments(self, link_id):
+        return self.request('link', 'comments', [link_id])
+
+    def get_link_reports(self, link_id):
+        return self.request('link', 'reports', [link_id])
+
+    def get_link_digs(self, link_id):
+        return self.request('link', 'digs', [link_id])
+
+    def get_link_related(self, link_id):
+        return self.request('link', 'related', [link_id])
+
+    def get_link_buryreasons(self):
+        return self.request('link', 'buryreasons')
+
+    @login_required
+    def observe_link(self, link_id):
+        return self.request('link', 'observe', [link_id])
+
+    @login_required
+    def favorite_link(self, link_id):
+        return self.request('link', 'favorite', [link_id])
 
     # Profile
 
@@ -251,7 +274,7 @@ class WykopAPI:
 
     # Entries
 
-    @login_requred
+    @login_required
     def add_entry(self, body, embed=None):
         post_params = {'body': body}
         if embed:
