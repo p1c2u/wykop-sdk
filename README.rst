@@ -79,6 +79,24 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Added        | get_profile_links      |
 +--------------+------------------------+ 
+| Published    | get_profile_published  | 
++--------------+------------------------+ 
+| Commented    | get_profile_commented  | 
++--------------+------------------------+ 
+| Digged       | get_profile_digged     | 
++--------------+------------------------+ 
+| Buried       | get_profile_buried     |
++--------------+------------------------+ 
+| Observe      | observe_profile        | 
++--------------+------------------------+ 
+| Unobserve    | unobserve_profile      | 
++--------------+------------------------+ 
+| Followers    | get_profile_followers  | 
++--------------+------------------------+ 
+| Followed     | get_profile_followed   | 
++--------------+------------------------+ 
+| Favorites    | get_profile_favorites  | 
++--------------+------------------------+ 
 | **User**                              | 
 +--------------+------------------------+ 
 | Login        | user_login             | 

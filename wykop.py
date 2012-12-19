@@ -287,6 +287,50 @@ class WykopAPI:
         return self.request('profile', 'added', [username],
                             api_params=api_params)
 
+    def get_profile_published(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'published', [username],
+                            api_params=api_params)
+
+    def get_profile_commented(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'commented', [username],
+                            api_params=api_params)
+
+    def get_profile_digged(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'digged', [username],
+                            api_params=api_params)
+
+    @login_required
+    def get_profile_buried(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        return self.request('profile', 'buried', [username],
+                            api_params=api_params)
+
+    @login_required
+    def observe_profile(self, username):
+        return self.request('profile', 'observe', [username])
+    
+    @login_required
+    def unobserve_profile(self, username):
+        return self.request('profile', 'unobserve', [username])
+
+    def get_profile_followers(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        return self.request('profile', 'followers', [username],
+                            api_params=api_params)
+
+    def get_profile_followed(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        return self.request('profile', 'followed', [username],
+                            api_params=api_params)
+
+    def get_profile_favorites(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'favorites', [username],
+                            api_params=api_params)
+
     # User
 
     def user_login(self):
