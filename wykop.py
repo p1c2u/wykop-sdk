@@ -16,12 +16,12 @@ def paramsencode(d):
 def login_required(method):
     def decorator(self, *args, **kwargs):
         if not self.userkey:
-            self._get_new_userkey()
+            self.authenticate()
         try:
             return method(self, *args, **kwargs)
         # get new userkey on invalid key
         except InvalidUserKeyError:
-            self._get_new_userkey()
+            self.authenticate()
             return method(self, *args, **kwargs)
     return decorator
 
@@ -152,6 +152,8 @@ class WykopAPI:
         self.login = login
         self.accountkey = accountkey
         self.userkey = ''
+        if login and accountkey:
+            self.authenticate()
 
     def _construct_url(self, rtype, rmethod, rmethod_params=(), api_params={}):
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
@@ -159,7 +161,10 @@ class WykopAPI:
         urlparts = (self._protocol, self._domain,  path, '', '', '')
         return urlparse.urlunparse(urlparts)
 
-    def _get_new_userkey(self):
+    def authenticate(self, login=None, accountkey=None):
+        if login and accountkey:
+            self.login = login
+            self.accountkey = accountkey
         res = self.user_login()
         self.userkey = res['userkey']
 
