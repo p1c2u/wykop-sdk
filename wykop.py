@@ -384,6 +384,17 @@ class WykopAPI:
     def get_user_observed(self):
         return self.request('user', 'observed') 
 
+    # Top
+
+    def get_top(self, year):
+        return self.request('top', 'index', [year])
+
+    def get_top_date(self, year, month, page=1):
+        year = year or date.today().year
+        post_params = {'page': page}
+        return self.request('top', 'date', [year, month],
+                            post_params=post_params)
+
     # Entries
 
     @login_required

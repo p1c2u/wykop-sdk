@@ -130,6 +130,12 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Observed     | user_observed          | 
 +--------------+------------------------+ 
+| **Top**                               | 
++--------------+------------------------+ 
+| Index        | get_top                | 
++--------------+------------------------+ 
+| Date         | get_top_date           | 
++--------------+------------------------+ 
 | **Entries**                           | 
 +--------------+------------------------+ 
 | Add          | add_entry              | 
