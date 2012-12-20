@@ -136,6 +136,14 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Date         | get_top_date           | 
 +--------------+------------------------+ 
+| **Related**                           | 
++--------------+------------------------+ 
+| Plus         | plus_related           | 
++--------------+------------------------+ 
+| Minus        | minus_related          | 
++--------------+------------------------+ 
+| Add          | add_related            | 
++--------------+------------------------+ 
 | **Entries**                           | 
 +--------------+------------------------+ 
 | Add          | add_entry              | 

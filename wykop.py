@@ -395,6 +395,22 @@ class WykopAPI:
         return self.request('top', 'date', [year, month],
                             post_params=post_params)
 
+    # Related
+
+    @login_required
+    def plus_related(self, link_id, related_id):
+        return self.request('related', 'plus', [link_id, related_id])
+
+    @login_required
+    def minus_related(self, link_id, related_id):
+        return self.request('related', 'minus', [link_id, related_id])
+
+    @login_required
+    def add_related(self, link_id, url, title):
+        post_params = {'url': url, 'title': title}
+        return self.request('related', 'add', [link_id],
+                            post_params=post_params)
+
     # Entries
 
     @login_required
