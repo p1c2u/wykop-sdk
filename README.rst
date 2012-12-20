@@ -126,6 +126,10 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Login        | user_login             | 
 +--------------+------------------------+ 
+| Favorites    | user_favorites         | 
++--------------+------------------------+ 
+| Observed     | user_observed          | 
++--------------+------------------------+ 
 | **Entries**                           | 
 +--------------+------------------------+ 
 | Add          | add_entry              | 

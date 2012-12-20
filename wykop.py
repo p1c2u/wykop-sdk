@@ -376,6 +376,14 @@ class WykopAPI:
         return self.request('user', 'login', 
                             post_params=post_params)
 
+    @login_required
+    def get_user_favorites(self):
+        return self.request('user', 'favorites') 
+
+    @login_required
+    def get_user_observed(self):
+        return self.request('user', 'observed') 
+
     # Entries
 
     @login_required
