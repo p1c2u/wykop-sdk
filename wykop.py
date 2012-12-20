@@ -7,6 +7,7 @@ import logging
 import urlparse
 import urllib
 import urllib2
+from datetime import date, timedelta
 try: import simplejson as json
 except ImportError: import json
 
@@ -335,6 +336,38 @@ class WykopAPI:
         api_params = {'appkey': self.appkey, 'page': page}
         return self.request('profile', 'favorites', [username],
                             api_params=api_params)
+
+    # Search
+    
+    def search(self, q, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        post_params = {'q': q}
+        return self.request('search', 'index',
+                            api_params=api_params,
+                            post_params=post_params)
+
+    def search_links(self, q, page=1, what='all', sort='best', 
+                     when='all', date_from=None, date_to=None, votes=0):
+        date_from = date_to or (date.today() - timedelta(days=30) ).strftime("%d/%m/%Y")
+        date_to = date_to or date.today().strftime("%d/%m/%Y")
+        api_params = {'appkey': self.appkey, 'page': page}
+        post_params = {'q': q, 'what': what, 'sort': sort, 'when': when,
+                       'from': date_from, 'to': date_to, 'votes': votes}
+        return self.request('search', 'links',
+                            api_params=api_params,
+                            post_params=post_params)
+
+    def search_entries(self, q, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        post_params = {'q': q}
+        return self.request('search', 'entries',
+                            api_params=api_params,
+                            post_params=post_params)
+
+    def search_profiles(self, q):
+        post_params = {'q': q}
+        return self.request('search', 'entries',
+                            post_params=post_params)
 
     # User
 

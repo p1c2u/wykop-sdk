@@ -112,6 +112,16 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | Favorites    | get_profile_favorites  | 
 +--------------+------------------------+ 
+| **Search**                            | 
++--------------+------------------------+ 
+| Index        | search                 | 
++--------------+------------------------+ 
+| Links        | search_links           | 
++--------------+------------------------+ 
+| Entries      | search_entries         | 
++--------------+------------------------+ 
+| Profiles     | search_profiles        | 
++--------------+------------------------+ 
 | **User**                              | 
 +--------------+------------------------+ 
 | Login        | user_login             | 
