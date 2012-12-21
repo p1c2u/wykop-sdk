@@ -2,7 +2,7 @@
 '''
 Created on 18-12-2012
 
-@author: artur
+@author: maciag.artur
 '''
 from setuptools import setup, find_packages
 
