@@ -14,13 +14,11 @@ setup(
     long_description=open("README.rst").read(),
     author='Artur Maciag',
     author_email='maciag.artur@gmail.com',
-    url='https://github.com/pythonforfacebook/facebook-sdk',
-    license='Apache',
-    packages=find_packages(exclude=('tests', 'example')),
+    url='https://github.com/p1c2u/wykop-sdk',
+    license='BSD',
     py_modules=[
         'wykop',
     ],
-    test_suite='runtests.runtests',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',

@@ -413,6 +413,9 @@ class WykopAPI:
 
     # Entries
 
+    def get_entry(self, entry_id):
+        return self.request('entries', 'index', [entry_id])
+
     @login_required
     def add_entry(self, body, embed=None):
         post_params = {'body': body}
@@ -420,3 +423,47 @@ class WykopAPI:
             post_params.update({'embed': embed})
         return self.request('entries', 'add', 
                             post_params=post_params)
+
+    @login_required
+    def edit_entry(self, entry_id, body):
+        post_params = {'body': body}
+        return self.request('entries', 'edit', 
+                            post_params=post_params)
+
+    @login_required
+    def delete_entry(self, entry_id):
+        return self.request('entries', 'delete', [entry_id])
+
+    @login_required
+    def add_entry_comment(self, entry_id, body, embed):
+        post_params = {'body': body}
+        if embed:
+            post_params.update({'embed': embed})
+        return self.request('entries', 'addcomment', [entry_id],
+                            post_params=post_params)
+
+    @login_required
+    def edit_entry_comment(self, entry_id, comment_id, body):
+        post_params = {'body': body}
+        return self.request('entries', 'editcomment', [entry_id, comment_id],
+                            post_params=post_params)
+
+    @login_required
+    def delete_entry_comment(self, entry_id, comment_id):
+        return self.request('entries', 'deletecomment', [entry_id, comment_id])
+
+    @login_required
+    def vote_entry(self, entry_id):
+        return self.request('entries', 'vote', ['entry', entry_id])
+
+    @login_required
+    def unvote_entry(self, entry_id):
+        return self.request('entries', 'unvote', ['entry', entry_id])
+
+    @login_required
+    def vote_entry_comment(self, entry_id, comment_id):
+        return self.request('entries', 'vote', ['comment', entry_id, comment_id])
+
+    @login_required
+    def unvote_entry_comment(self, entry_id, comment_id):
+        return self.request('entries', 'unvote', ['comment', entry_id, comment_id])

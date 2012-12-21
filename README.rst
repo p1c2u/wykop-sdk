@@ -146,7 +146,25 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +--------------+------------------------+ 
 | **Entries**                           | 
 +--------------+------------------------+ 
+| Index        | get_entry              | 
++--------------+------------------------+ 
 | Add          | add_entry              | 
++--------------+------------------------+ 
+| Edit         | edit_entry             | 
++--------------+------------------------+ 
+| Delete       | delete_entry           | 
++--------------+------------------------+ 
+| AddComment   | add_entry_comment      | 
++--------------+------------------------+ 
+| EditComment  | edit_entry_comment     | 
++--------------+------------------------+ 
+| DeleteComment| delete_entry_comment   | 
++--------------+------------------------+ 
+| Vote         | vote_entry             | 
+|              | vote_wntry_comment     | 
++--------------+------------------------+ 
+| Unvote       | unvote_entry           | 
+|              | unvote_wntry_comment   | 
 +--------------+------------------------+ 
 
 Proste żądania
