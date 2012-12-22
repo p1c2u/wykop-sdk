@@ -183,7 +183,7 @@ class WykopAPI:
         try:
             f = urllib2.urlopen(url, urllib.urlencode(post_params))
         except urllib2.HTTPError, e:
-            raise WykopAPIError(0, "Unnown request error")
+            raise WykopAPIError(0, "Unknown request error")
         
         try:
             response = json.loads(f.read())
