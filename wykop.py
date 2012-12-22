@@ -467,3 +467,22 @@ class WykopAPI:
     @login_required
     def unvote_entry_comment(self, entry_id, comment_id):
         return self.request('entries', 'unvote', ['comment', entry_id, comment_id])
+
+    # Rank
+
+    def get_rank(self):
+        return self.request('rank', 'index')
+
+    # Observatory
+
+    def get_observatory_votes(self):
+        return self.request('observatory', 'votes')
+
+    def get_observatory_comments(self):
+        return self.request('observatory', 'comments')
+
+    def get_observatory_entries(self):
+        return self.request('observatory', 'entries')
+
+    def get_observatory_entries_comments(self):
+        return self.request('observatory', 'entriescomments')
