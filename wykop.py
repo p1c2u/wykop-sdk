@@ -486,3 +486,13 @@ class WykopAPI:
 
     def get_observatory_entries_comments(self):
         return self.request('observatory', 'entriescomments')
+
+    # Favorites
+
+    @login_required
+    def get_favorites(self, list_id):
+        return self.request('favorites', 'index', [list_id])
+
+    @login_required
+    def get_favorites_lists(self):
+        return self.request('favorites', 'lists')

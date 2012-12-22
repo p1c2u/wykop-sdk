@@ -180,6 +180,12 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +-----------------+--------------------------------+ 
 | EntriesComments | get_observatory_entres_comments| 
 +-----------------+--------------------------------+ 
+| **Favorites**                                    | 
++-----------------+--------------------------------+ 
+| Index           | get_favorites                  | 
++-----------------+--------------------------------+ 
+| Lists           | get_favorites_lists            | 
++-----------------+--------------------------------+ 
 
 Proste żądania
 -----------------
