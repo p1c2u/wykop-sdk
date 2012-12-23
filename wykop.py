@@ -26,10 +26,14 @@ def login_required(method):
             return method(self, *args, **kwargs)
     return decorator
 
+class AttrDict(dict): 
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+
 class WykopAPIError(Exception):
-    def __init__(self, type, message):
+    def __init__(self, type_, message):
         Exception.__init__(self, message)
-        self.type = type
+        self.type = type_
 
 class InvalidAPIKeyError(WykopAPIError):
     pass
@@ -182,11 +186,11 @@ class WykopAPI:
         
         try:
             f = urllib2.urlopen(url, urllib.urlencode(post_params))
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError:
             raise WykopAPIError(0, "Unknown request error")
         
         try:
-            response = json.loads(f.read())
+            response = json.loads(f.read(), object_hook=lambda x: AttrDict(x))
             if 'error' in response:
                 exception_class = __all_exceptions__.get(response['error']['code'], WykopAPIError)
                 raise exception_class(response['error']['code'], 
