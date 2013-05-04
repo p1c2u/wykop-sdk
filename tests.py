@@ -16,7 +16,11 @@ class WykopAPITests(unittest.TestCase):
             appkey = os.environ['APPKEY']
         except KeyError:
             self.fail("APPKEY not set") 
-        self.api = WykopAPI(appkey)
+        try:
+            secretkey = os.environ['SECRETKEY']
+        except KeyError:
+            self.fail("SECRETKEY not set") 
+        self.api = WykopAPI(appkey, secretkey)
 
     def test_get_link_success(self):
         self.api.get_link(1)

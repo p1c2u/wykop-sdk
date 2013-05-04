@@ -14,7 +14,7 @@ Przykładowe użycie:
 
     import wykop
 
-    api = wykop.WykopAPI(klucz_aplikacji)
+    api = wykop.WykopAPI(klucz_aplikacji, sekret_aplikacji)
     profile = api.get_profile("m__b")
 
 Uwierzytelnienie 
@@ -28,7 +28,7 @@ Przykładowe użycie metody wymagającej uwierzytelnienia:
 
     import wykop
 
-    api = wykop.WykopAPI(klucz_aplikacji)
+    api = wykop.WykopAPI(klucz_aplikacji, sekret_aplikacji)
     api.authenticate(login, klucz_polaczenia)
     profile = api.observe_profile("m__b")
 

@@ -7,9 +7,12 @@ import logging
 import urlparse
 import urllib
 import urllib2
+import hashlib
 from datetime import date, timedelta
 try: import simplejson as json
 except ImportError: import json
+
+__version__ = "0.1.1"
 
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
@@ -151,9 +154,10 @@ class WykopAPI:
     _protocol = 'http'
     _domain = "a.wykop.pl"
     
-    def __init__(self, appkey, login=None, accountkey=None):
+    def __init__(self, appkey, secretkey, login=None, accountkey=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
         self.appkey = appkey
+        self.secretkey = secretkey
         self.login = login
         self.accountkey = accountkey
         self.userkey = ''
@@ -167,11 +171,16 @@ class WykopAPI:
         return urlparse.urlunparse(urlparts)
 
     def authenticate(self, login=None, accountkey=None):
-        if login and accountkey:
-            self.login = login
-            self.accountkey = accountkey
-        res = self.user_login()
+        self.login = login or self.login
+        self.accountkey = accountkey or self.accountkey
+        if not self.login or not self.accountkey:
+            raise WykopAPIError(0, "Login and/or account key not set")
+        res = self.user_login(self.login, self.accountkey)
         self.userkey = res['userkey']
+    
+    def get_request_sign(self, url, post_params={}):
+        post_params = ",".join(map(str, post_params.values()))
+        return hashlib.md5(self.secretkey + url + post_params).hexdigest()
 
     def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}):
         self.logger.debug("Making request")
@@ -182,10 +191,15 @@ class WykopAPI:
         api_params = paramsencode(api_params)
         
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
-        self.logger.debug(" Fetch url: %s" % str(url))
+        apisign = self.get_request_sign(url, post_params)
+        
+        req = urllib2.Request(url, urllib.urlencode(post_params))
+        req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
+        req.add_header('apisign', apisign)
+        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % (str(url), str(post_params), str(apisign)))
         
         try:
-            f = urllib2.urlopen(url, urllib.urlencode(post_params))
+            f = urllib2.urlopen(req)
         except urllib2.HTTPError:
             raise WykopAPIError(0, "Unknown request error")
         
@@ -375,8 +389,8 @@ class WykopAPI:
 
     # User
 
-    def user_login(self):
-        post_params = {'login': self.login, 'accountkey': self.accountkey}
+    def user_login(self, login, accountkey):
+        post_params = {'login': login, 'accountkey': accountkey}
         return self.request('user', 'login', 
                             post_params=post_params)
 
