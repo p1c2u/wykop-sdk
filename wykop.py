@@ -182,36 +182,44 @@ class WykopAPI:
         post_params = ",".join(map(str, post_params.values()))
         return hashlib.md5(self.secretkey + url + post_params).hexdigest()
 
-    def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}):
+    def _request(self, url, data, sign):
+        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % (str(url), str(data), str(sign)))
+        req = urllib2.Request(url, urllib.urlencode(data))
+        req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
+        req.add_header('apisign', sign)
+        
+        try:
+            f = urllib2.urlopen(req)
+            return f.read()
+        except urllib2.HTTPError, e:
+            raise WykopAPIError(0, e)
+        finally:
+            f.close()
+
+    def _parse_json(self, data):
+        result = json.loads(data, object_hook=lambda x: AttrDict(x))
+        if 'error' in result:
+            exception_class = __all_exceptions__.get(result['error']['code'], WykopAPIError)
+            raise exception_class(result['error']['code'], 
+                                result['error']['message'])
+        return result
+
+    def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}, raw_response=False):
         self.logger.debug("Making request")
         # map all params to string
         rmethod_params = tuple(map(str, rmethod_params))
         # appkey is default for api_params
-        api_params = api_params or {'appkey': self.appkey, 'userkey': self.userkey}
-        api_params = paramsencode(api_params)
+        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
+        api_params_all.update(api_params)
+        api_params = paramsencode(api_params_all)
         
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
+        response = self._request(url, post_params, apisign)
         
-        req = urllib2.Request(url, urllib.urlencode(post_params))
-        req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
-        req.add_header('apisign', apisign)
-        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % (str(url), str(post_params), str(apisign)))
-        
-        try:
-            f = urllib2.urlopen(req)
-        except urllib2.HTTPError:
-            raise WykopAPIError(0, "Unknown request error")
-        
-        try:
-            response = json.loads(f.read(), object_hook=lambda x: AttrDict(x))
-            if 'error' in response:
-                exception_class = __all_exceptions__.get(response['error']['code'], WykopAPIError)
-                raise exception_class(response['error']['code'], 
-                                    response['error']['message'])
-        finally:
-            f.close()
-        return response
+        if raw_response:
+            return response
+        return self._parse_json(response)
 
     # Comments
 
