@@ -164,7 +164,14 @@ class WykopAPI:
         if login and accountkey:
             self.authenticate()
 
-    def _construct_url(self, rtype, rmethod, rmethod_params=(), api_params={}):
+    def _construct_url(self, rtype, rmethod, rmethod_params=[], api_params={}):
+        # map all params to string
+        rmethod_params = tuple(map(str, rmethod_params))
+        # appkey is default for api_params
+        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
+        api_params_all.update(api_params)
+        api_params = paramsencode(api_params_all)
+        
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
         urlparts = (self._protocol, self._domain,  path, '', '', '')
@@ -205,14 +212,7 @@ class WykopAPI:
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}, raw_response=False):
-        self.logger.debug("Making request")
-        # map all params to string
-        rmethod_params = tuple(map(str, rmethod_params))
-        # appkey is default for api_params
-        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
-        api_params_all.update(api_params)
-        api_params = paramsencode(api_params_all)
-        
+        self.logger.debug("Making request")        
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
         response = self._request(url, post_params, apisign)
