@@ -29,7 +29,7 @@ def login_required(method):
             return method(self, *args, **kwargs)
     return decorator
 
-class AttrDict(dict):
+class AttrDict(dict): 
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
 
@@ -106,7 +106,7 @@ class EntryDoesNotExistError(WykopAPIError):
 
 class QueryTooShortError(WykopAPIError):
     pass
-
+    
 class CommentDoesNotExistError(WykopAPIError):
     pass
 
@@ -150,10 +150,10 @@ __all_exceptions__ = {
 }
 
 class WykopAPI:
-
+    
     _protocol = 'http'
     _domain = "a.wykop.pl"
-
+    
     def __init__(self, appkey, secretkey, login=None, accountkey=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
         self.appkey = appkey
@@ -171,7 +171,7 @@ class WykopAPI:
         api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
         api_params_all.update(api_params)
         api_params = paramsencode(api_params_all)
-
+        
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
         urlparts = (self._protocol, self._domain,  path, '', '', '')
@@ -184,7 +184,7 @@ class WykopAPI:
             raise WykopAPIError(0, "Login and/or account key not set")
         res = self.user_login(self.login, self.accountkey)
         self.userkey = res['userkey']
-
+    
     def get_request_sign(self, url, post_params={}):
         post_params = ",".join(map(str, post_params.values()))
         return hashlib.md5(self.secretkey + url + post_params).hexdigest()
@@ -194,7 +194,7 @@ class WykopAPI:
         req = urllib2.Request(url, urllib.urlencode(data))
         req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
         req.add_header('apisign', sign)
-
+        
         try:
             f = urllib2.urlopen(req)
             return f.read()
@@ -207,16 +207,16 @@ class WykopAPI:
         result = json.loads(data, object_hook=lambda x: AttrDict(x))
         if 'error' in result:
             exception_class = __all_exceptions__.get(result['error']['code'], WykopAPIError)
-            raise exception_class(result['error']['code'],
+            raise exception_class(result['error']['code'], 
                                 result['error']['message'])
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}, raw_response=False):
-        self.logger.debug("Making request")
+        self.logger.debug("Making request")        
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
         response = self._request(url, post_params, apisign)
-
+        
         if raw_response:
             return response
         return self._parse_json(response)
@@ -228,7 +228,7 @@ class WykopAPI:
         post_params = {'body': body}
         if embed:
             post_params.update({'embed': embed})
-        return self.request('comments', 'add', [link_id, comment_id],
+        return self.request('comments', 'add', [link_id, comment_id], 
                             post_params=post_params)
 
     @login_required
@@ -290,7 +290,7 @@ class WykopAPI:
         return self.request('link', 'favorite', [link_id])
 
     # Links
-
+    
     def get_links_promoted(self, page=1, sort='day'):
         api_params = {'appkey': self.appkey, 'page': page, 'sort': sort}
         return self.request('links', 'promoted',
@@ -302,7 +302,7 @@ class WykopAPI:
                             api_params=api_params)
 
     # Popular
-
+    
     def get_popular_promoted(self):
         return self.request('popular', 'promoted',)
 
@@ -343,7 +343,7 @@ class WykopAPI:
     @login_required
     def observe_profile(self, username):
         return self.request('profile', 'observe', [username])
-
+    
     @login_required
     def unobserve_profile(self, username):
         return self.request('profile', 'unobserve', [username])
@@ -364,7 +364,7 @@ class WykopAPI:
                             api_params=api_params)
 
     # Search
-
+    
     def search(self, q, page=1):
         api_params = {'appkey': self.appkey, 'page': page}
         post_params = {'q': q}
@@ -372,7 +372,7 @@ class WykopAPI:
                             api_params=api_params,
                             post_params=post_params)
 
-    def search_links(self, q, page=1, what='all', sort='best',
+    def search_links(self, q, page=1, what='all', sort='best', 
                      when='all', date_from=None, date_to=None, votes=0):
         date_from = date_to or (date.today() - timedelta(days=30) ).strftime("%d/%m/%Y")
         date_to = date_to or date.today().strftime("%d/%m/%Y")
@@ -399,16 +399,16 @@ class WykopAPI:
 
     def user_login(self, login, accountkey):
         post_params = {'login': login, 'accountkey': accountkey}
-        return self.request('user', 'login',
+        return self.request('user', 'login', 
                             post_params=post_params)
 
     @login_required
     def get_user_favorites(self):
-        return self.request('user', 'favorites')
+        return self.request('user', 'favorites') 
 
     @login_required
     def get_user_observed(self):
-        return self.request('user', 'observed')
+        return self.request('user', 'observed') 
 
     # Top
 
@@ -447,13 +447,13 @@ class WykopAPI:
         post_params = {'body': body}
         if embed:
             post_params.update({'embed': embed})
-        return self.request('entries', 'add',
+        return self.request('entries', 'add', 
                             post_params=post_params)
 
     @login_required
     def edit_entry(self, entry_id, body):
         post_params = {'body': body}
-        return self.request('entries', 'edit',
+        return self.request('entries', 'edit', 
                             post_params=post_params)
 
     @login_required
