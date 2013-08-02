@@ -189,7 +189,7 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 | **Tag**                                          | 
 +-----------------+--------------------------------+ 
 | Index           | tag                            | 
-+--------------------------------------------------+
++-----------------+--------------------------------+ 
 
 Proste żądania
 -----------------
