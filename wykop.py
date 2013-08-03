@@ -522,3 +522,10 @@ class WykopAPI:
     @login_required
     def get_favorites_lists(self):
         return self.request('favorites', 'lists')
+
+    # Tag
+
+    def tag(self, tag_name, page=1):
+        return self.request('tag', 'index',
+                            [tag_name],
+                            {'page': page})
