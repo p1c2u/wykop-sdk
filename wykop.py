@@ -17,6 +17,9 @@ __version__ = "0.1.1"
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
 
+def dictmap(d, f):
+    return dict(map(lambda (k,v): (k, (v)), d.iteritems()))
+
 def login_required(method):
     def decorator(self, *args, **kwargs):
         if not self.userkey:
@@ -186,11 +189,13 @@ class WykopAPI:
         self.userkey = res['userkey']
     
     def get_request_sign(self, url, post_params={}):
-        post_params = ",".join(map(str, post_params.values()))
-        return hashlib.md5(self.secretkey + url + post_params).hexdigest()
+        post_values_list = [post_params[key].encode('utf-8') for key in sorted(post_params.keys())]
+        post_values = ",".join(post_values_list)
+        return hashlib.md5(self.secretkey + url + post_values).hexdigest()
 
     def _request(self, url, data, sign):
-        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % (str(url), str(data), str(sign)))
+        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
+                          (str(url), str(data), str(sign)))
         req = urllib2.Request(url, urllib.urlencode(data))
         req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
         req.add_header('apisign', sign)
@@ -211,8 +216,10 @@ class WykopAPI:
                                 result['error']['message'])
         return result
 
-    def request(self, rtype, rmethod, rmethod_params=[], api_params={}, post_params={}, raw_response=False):
-        self.logger.debug("Making request")        
+    def request(self, rtype, rmethod, rmethod_params=[], 
+                api_params={}, post_params={}, raw_response=False):
+        self.logger.debug("Making request")
+        post_params = dictmap(post_params, lambda x: x.encode('utf-8') if isinstance(x, unicode) else x)
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
         response = self._request(url, post_params, apisign)
@@ -522,6 +529,14 @@ class WykopAPI:
     @login_required
     def get_favorites_lists(self):
         return self.request('favorites', 'lists')
+
+    # Stream
+    
+    def get_stream(self, page=1):
+        return self.request('stream', 'index', [page])
+
+    def get_stream_hot(self, page=1):
+        return self.request('stream', 'hot', [page])
 
     # Tag
 
