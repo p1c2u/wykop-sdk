@@ -8,6 +8,7 @@ import urlparse
 import urllib
 import urllib2
 import hashlib
+import contextlib
 from datetime import date, timedelta
 try: import simplejson as json
 except ImportError: import json
@@ -187,9 +188,9 @@ class WykopAPI:
             raise WykopAPIError(0, "Login and/or account key not set")
         res = self.user_login(self.login, self.accountkey)
         self.userkey = res['userkey']
-    
+
     def get_request_sign(self, url, post_params={}):
-        post_values_list = [post_params[key].encode('utf-8') for key in sorted(post_params.keys())]
+        post_values_list = [unicode(post_params[key]).encode('utf-8') for key in sorted(post_params.keys())]
         post_values = ",".join(post_values_list)
         return hashlib.md5(self.secretkey + url + post_values).hexdigest()
 
@@ -201,12 +202,14 @@ class WykopAPI:
         req.add_header('apisign', sign)
         
         try:
-            f = urllib2.urlopen(req)
-            return f.read()
+            with contextlib.closing(urllib2.urlopen(req)) as f:
+                return f.read()
         except urllib2.HTTPError, e:
-            raise WykopAPIError(0, e)
-        finally:
-            f.close()
+            raise WykopAPIError(0, str(e.code))
+        except urllib2.URLError, e:
+            raise WykopAPIError(0, str(e.reason))
+        except Exception, e:
+            raise WykopAPIError(0, 'Unhandled exception')
 
     def _parse_json(self, data):
         result = json.loads(data, object_hook=lambda x: AttrDict(x))
