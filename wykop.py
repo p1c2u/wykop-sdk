@@ -199,6 +199,10 @@ class WykopAPI:
     def _request(self, url, data, sign):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
                           (str(url), str(data), str(sign)))
+
+        for key in data.keys():
+            data[key] = unicode(data[key]).encode('utf-8')
+
         req = urllib2.Request(url, urllib.urlencode(data))
         req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
         req.add_header('apisign', sign)
