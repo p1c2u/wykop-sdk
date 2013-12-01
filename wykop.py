@@ -158,12 +158,13 @@ class WykopAPI:
     _protocol = 'http'
     _domain = "a.wykop.pl"
     
-    def __init__(self, appkey, secretkey, login=None, accountkey=None):
+    def __init__(self, appkey, secretkey, login=None, accountkey=None, password=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
         self.appkey = appkey
         self.secretkey = secretkey
         self.login = login
         self.accountkey = accountkey
+        self.password = password
         self.userkey = ''
         if login and accountkey:
             self.authenticate()
@@ -181,12 +182,13 @@ class WykopAPI:
         urlparts = (self._protocol, self._domain,  path, '', '', '')
         return urlparse.urlunparse(urlparts)
 
-    def authenticate(self, login=None, accountkey=None):
+    def authenticate(self, login=None, accountkey=None, password=None):
         self.login = login or self.login
         self.accountkey = accountkey or self.accountkey
-        if not self.login or not self.accountkey:
-            raise WykopAPIError(0, "Login and/or account key not set")
-        res = self.user_login(self.login, self.accountkey)
+        self.password = password or self.password
+        if not self.login or not (self.accountkey or self.password):
+            raise WykopAPIError(0, "Login or (password or account key) not set")
+        res = self.user_login(self.login, self.accountkey, self.password)
         self.userkey = res['userkey']
 
     def get_request_sign(self, url, post_params={}):
@@ -407,8 +409,14 @@ class WykopAPI:
 
     # User
 
-    def user_login(self, login, accountkey):
-        post_params = {'login': login, 'accountkey': accountkey}
+    def user_login(self, login, accountkey=None, password=None):
+        post_params = {'login': login}
+
+        if accountkey:
+            post_params['accountkey'] = accountkey
+        if password:
+            post_params['password'] = password
+
         return self.request('user', 'login', 
                             post_params=post_params)
 
