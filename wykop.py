@@ -555,3 +555,25 @@ class WykopAPI:
         return self.request('tag', 'index',
                             [tag_name],
                             {'page': page})
+    # PM
+
+    @login_required
+    def get_conversations_list(self):
+        return self.request('pm', 'conversationslist')
+
+    @login_required
+    def get_conversation(self, username):
+        return self.request('pm', 'conversation', [username])
+
+
+    @login_required
+    def send_message(self, username, body, embed=None):
+        post_params = {'body': body}
+        if embed:
+            post_params.update({'embed': embed})
+        return self.request('pm', 'sendmessage', [username],
+                            post_params=post_params)
+
+    @login_required
+    def delete_conversation(self, username):
+        return self.request('pm', 'deleteconversation', [username])
