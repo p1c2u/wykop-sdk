@@ -180,7 +180,7 @@ class WykopAPI:
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
         urlparts = (self._protocol, self._domain,  path, '', '', '')
-        return urlparse.urlunparse(urlparts)
+        return str(urlparse.urlunparse(urlparts))
 
     def authenticate(self, login=None, accountkey=None, password=None):
         self.login = login or self.login
