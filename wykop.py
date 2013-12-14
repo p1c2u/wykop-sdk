@@ -158,12 +158,13 @@ class WykopAPI:
     _protocol = 'http'
     _domain = "a.wykop.pl"
     
-    def __init__(self, appkey, secretkey, login=None, accountkey=None):
+    def __init__(self, appkey, secretkey, login=None, accountkey=None, password=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
         self.appkey = appkey
         self.secretkey = secretkey
         self.login = login
         self.accountkey = accountkey
+        self.password = password
         self.userkey = ''
         if login and accountkey:
             self.authenticate()
@@ -179,14 +180,15 @@ class WykopAPI:
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
         urlparts = (self._protocol, self._domain,  path, '', '', '')
-        return urlparse.urlunparse(urlparts)
+        return str(urlparse.urlunparse(urlparts))
 
-    def authenticate(self, login=None, accountkey=None):
+    def authenticate(self, login=None, accountkey=None, password=None):
         self.login = login or self.login
         self.accountkey = accountkey or self.accountkey
-        if not self.login or not self.accountkey:
-            raise WykopAPIError(0, "Login and/or account key not set")
-        res = self.user_login(self.login, self.accountkey)
+        self.password = password or self.password
+        if not self.login or not (self.accountkey or self.password):
+            raise WykopAPIError(0, "Login or (password or account key) not set")
+        res = self.user_login(self.login, self.accountkey, self.password)
         self.userkey = res['userkey']
 
     def get_request_sign(self, url, post_params={}):
@@ -197,6 +199,10 @@ class WykopAPI:
     def _request(self, url, data, sign):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
                           (str(url), str(data), str(sign)))
+
+        for key in data.keys():
+            data[key] = unicode(data[key]).encode('utf-8')
+
         req = urllib2.Request(url, urllib.urlencode(data))
         req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
         req.add_header('apisign', sign)
@@ -407,8 +413,14 @@ class WykopAPI:
 
     # User
 
-    def user_login(self, login, accountkey):
-        post_params = {'login': login, 'accountkey': accountkey}
+    def user_login(self, login, accountkey=None, password=None):
+        post_params = {'login': login}
+
+        if accountkey:
+            post_params['accountkey'] = accountkey
+        if password:
+            post_params['password'] = password
+
         return self.request('user', 'login', 
                             post_params=post_params)
 
@@ -547,3 +559,25 @@ class WykopAPI:
         return self.request('tag', 'index',
                             [tag_name],
                             {'page': page})
+    # PM
+
+    @login_required
+    def get_conversations_list(self):
+        return self.request('pm', 'conversationslist')
+
+    @login_required
+    def get_conversation(self, username):
+        return self.request('pm', 'conversation', [username])
+
+
+    @login_required
+    def send_message(self, username, body, embed=None):
+        post_params = {'body': body}
+        if embed:
+            post_params.update({'embed': embed})
+        return self.request('pm', 'sendmessage', [username],
+                            post_params=post_params)
+
+    @login_required
+    def delete_conversation(self, username):
+        return self.request('pm', 'deleteconversation', [username])
