@@ -9,11 +9,12 @@ import urllib
 import urllib2
 import hashlib
 import contextlib
+import sys
 from datetime import date, timedelta
 try: import simplejson as json
 except ImportError: import json
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
@@ -61,6 +62,9 @@ class InvalidAPISignError(WykopAPIError):
     pass
 
 class AppPermissionsError(WykopAPIError):
+    pass
+
+class SessionAppPermissionError(WykopAPIError):
     pass
 
 class InvalidUserKeyError(WykopAPIError):
@@ -131,6 +135,7 @@ __all_exceptions__ = {
     5:      DailtyRequestLimitError,
     6:      InvalidAPISignError,
     7:      AppPermissionsError,
+    8:      SessionAppPermissionError,
     11:     InvalidUserKeyError,
     12:     InvalidSessionKeyError,
     13:     UserDoesNotExistError,
@@ -222,7 +227,7 @@ class WykopAPI:
         if 'error' in result:
             exception_class = __all_exceptions__.get(result['error']['code'], WykopAPIError)
             raise exception_class(result['error']['code'], 
-                                result['error']['message'])
+                                result['error']['message'].encode(sys.stdout.encoding))
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[], 
