@@ -6,15 +6,24 @@ Created on 18-12-2012
 import logging
 import urlparse
 import urllib
-import urllib2
 import hashlib
-import contextlib
 import sys
 from datetime import date, timedelta
-try: import simplejson as json
-except ImportError: import json
 
-__version__ = "0.1.2"
+try: 
+    import simplejson as json
+except ImportError: 
+    import json
+
+try:
+    import requests
+    USE_REQUESTS = True
+except ImportError:
+    import urllib2
+    import contextlib
+    USE_REQUESTS = False
+
+__version__ = "0.2.0"
 
 def paramsencode(d):
     return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
@@ -201,9 +210,12 @@ class WykopAPI:
         post_values = ",".join(post_values_list)
         return hashlib.md5(self.secretkey + url + post_values).hexdigest()
 
-    def _request(self, url, data, sign):
+    def urllib2_request(self, url, data, sign, files=None):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
                           (str(url), str(data), str(sign)))
+
+        if files and not USE_REQUESTS:
+            raise NotImplementedError("Install requests package to send files.")
 
         for key in data.keys():
             data[key] = unicode(data[key]).encode('utf-8')
@@ -222,6 +234,30 @@ class WykopAPI:
         except Exception, e:
             raise WykopAPIError(0, 'Unhandled exception')
 
+    def requests_request(self, url, data, sign, files):
+        try:
+            method = 'POST' if data or files else 'GET'
+            headers = {
+                'User-Agent': "wykop-sdk/%s" % __version__,
+                'apisign': sign,
+            }
+            req = requests.request(method, url, data=data, 
+                                   headers=headers, files=files)
+            return req.content
+        except requests.exceptions.RequestException, e:
+            raise WykopAPIError(0, str(e.reason))
+        #except Exception, e:
+        #    raise WykopAPIError(0, 'Unhandled exception')
+
+    def _request(self, url, data, sign, files=None):
+        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
+                          (str(url), str(data), str(sign)))
+        
+        request_method = self.requests_request if USE_REQUESTS else self.urllib2_request
+        
+        return request_method(url, data, sign, files)
+        
+
     def _parse_json(self, data):
         result = json.loads(data, object_hook=lambda x: AttrDict(x))
         if 'error' in result:
@@ -231,12 +267,12 @@ class WykopAPI:
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[], 
-                api_params={}, post_params={}, raw_response=False):
+                api_params={}, post_params={}, file_params={}, raw_response=False):
         self.logger.debug("Making request")
         post_params = dictmap(post_params, lambda x: x.encode('utf-8') if isinstance(x, unicode) else x)
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
-        response = self._request(url, post_params, apisign)
+        response = self._request(url, post_params, apisign, file_params)
         
         if raw_response:
             return response
@@ -247,10 +283,15 @@ class WykopAPI:
     @login_required
     def add_comment(self, link_id, comment_id, body, embed=None):
         post_params = {'body': body}
+        file_params = {}
         if embed:
-            post_params.update({'embed': embed})
+            if isinstance(embed, file):
+                file_params.update({'embed': embed})
+            else:
+                post_params.update({'embed': embed})
         return self.request('comments', 'add', [link_id, comment_id], 
-                            post_params=post_params)
+                            post_params=post_params, 
+                            file_params=file_params)
 
     @login_required
     def plus_comment(self, link_id, comment_id):
@@ -470,12 +511,19 @@ class WykopAPI:
         return self.request('entries', 'index', [entry_id])
 
     @login_required
-    def add_entry(self, body, embed=None):
+    def add_entry(self, body, embed=None, channel=None):
         post_params = {'body': body}
+        file_params = {}
         if embed:
-            post_params.update({'embed': embed})
+            if isinstance(embed, file):
+                file_params.update({'embed': embed})
+            else:
+                post_params.update({'embed': embed})
+        if channel:
+            post_params.update({'channel': channel})
         return self.request('entries', 'add', 
-                            post_params=post_params)
+                            post_params=post_params, 
+                            file_params=file_params)
 
     @login_required
     def edit_entry(self, entry_id, body):
