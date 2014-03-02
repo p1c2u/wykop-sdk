@@ -3,33 +3,63 @@ Created on 18-12-2012
 
 @author: maciag.artur
 '''
+from __future__ import unicode_literals
+
 import logging
-import urlparse
-import urllib
 import hashlib
 import sys
 from datetime import date, timedelta
+
+try:
+    from urllib.parse import urlunparse, urlencode
+# pytho2 fallback
+except ImportError:
+    from urlparse import urlunparse
+    from urllib import urlencode
 
 try: 
     import simplejson as json
 except ImportError: 
     import json
 
+# try requests module
 try:
     import requests
     USE_REQUESTS = True
 except ImportError:
-    import urllib2
-    import contextlib
     USE_REQUESTS = False
+    import contextlib
+    try:
+        from urllib.request import Request, urlopen, HTTPError, URLError
+    # pytho2 fallback
+    except ImportError:
+        from urllib2 import Request, urlopen, HTTPError, URLError
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
+
+# python2 unicode fallback
+if sys.version < '3':
+    text_type = unicode
+    binary_type = str
+else:
+    text_type = str
+    binary_type = bytes
+
+def force_text(x, encoding='utf-8'):
+    if hasattr(x, 'decode'):
+        return x.decode(encoding)
+    return text_type(x)
+
+def force_binary(x, encoding='utf-8'):
+    if hasattr(x, 'encode'):
+        return x.encode(encoding)
+    return binary_type(x)
 
 def paramsencode(d):
-    return ','.join(['%s,%s' % (key, value) for (key, value) in d.items()])
+    return ','.join(['%s,%s' % (k, v) for (k, v) in list(d.items())])
 
-def dictmap(d, f):
-    return dict(map(lambda (k,v): (k, (v)), d.iteritems()))
+def dictmap(f, d):
+    return dict([(k_v[0], f(k_v[1])) for k_v in iter(d.items())])
 
 def login_required(method):
     def decorator(self, *args, **kwargs):
@@ -174,6 +204,7 @@ class WykopAPI:
     
     def __init__(self, appkey, secretkey, login=None, accountkey=None, password=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
+        
         self.appkey = appkey
         self.secretkey = secretkey
         self.login = login
@@ -194,7 +225,7 @@ class WykopAPI:
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
         urlparts = (self._protocol, self._domain,  path, '', '', '')
-        return str(urlparse.urlunparse(urlparts))
+        return str(urlunparse(urlparts))
 
     def authenticate(self, login=None, accountkey=None, password=None):
         self.login = login or self.login
@@ -206,9 +237,12 @@ class WykopAPI:
         self.userkey = res['userkey']
 
     def get_request_sign(self, url, post_params={}):
-        post_values_list = [unicode(post_params[key]).encode('utf-8') for key in sorted(post_params.keys())]
-        post_values = ",".join(post_values_list)
-        return hashlib.md5(self.secretkey + url + post_values).hexdigest()
+        values_list = [post_params[key] for key in sorted(post_params.keys())]
+        values = ",".join(values_list)
+        url_bytes = force_binary(url)
+        values_bytes = force_binary(values)
+        secretkey_bytes = force_binary(self.secretkey)
+        return hashlib.md5(secretkey_bytes + url_bytes + values_bytes).hexdigest()
 
     def urllib2_request(self, url, data, sign, files=None):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
@@ -217,21 +251,19 @@ class WykopAPI:
         if files and not USE_REQUESTS:
             raise NotImplementedError("Install requests package to send files.")
 
-        for key in data.keys():
-            data[key] = unicode(data[key]).encode('utf-8')
-
-        req = urllib2.Request(url, urllib.urlencode(data))
+        data_bytes = force_binary(urlencode(data))
+        req = Request(url, data_bytes)
         req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
         req.add_header('apisign', sign)
         
         try:
-            with contextlib.closing(urllib2.urlopen(req)) as f:
-                return f.read()
-        except urllib2.HTTPError, e:
+            with contextlib.closing(urlopen(req)) as f:
+                return force_text(f.read())
+        except HTTPError as e:
             raise WykopAPIError(0, str(e.code))
-        except urllib2.URLError, e:
+        except URLError as e:
             raise WykopAPIError(0, str(e.reason))
-        except Exception, e:
+        except Exception as e:
             raise WykopAPIError(0, 'Unhandled exception')
 
     def requests_request(self, url, data, sign, files):
@@ -243,33 +275,40 @@ class WykopAPI:
             }
             req = requests.request(method, url, data=data, 
                                    headers=headers, files=files)
-            return req.content
-        except requests.exceptions.RequestException, e:
+            return force_text(req.content)
+        except requests.exceptions.RequestException as e:
             raise WykopAPIError(0, str(e.reason))
-        #except Exception, e:
-        #    raise WykopAPIError(0, 'Unhandled exception')
+        except Exception as e:
+            raise WykopAPIError(0, 'Unhandled exception')
 
     def _request(self, url, data, sign, files=None):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" % 
                           (str(url), str(data), str(sign)))
         
-        request_method = self.requests_request if USE_REQUESTS else self.urllib2_request
+        request_method = self.requests_request if USE_REQUESTS \
+            else self.urllib2_request
         
         return request_method(url, data, sign, files)
-        
 
     def _parse_json(self, data):
         result = json.loads(data, object_hook=lambda x: AttrDict(x))
         if 'error' in result:
-            exception_class = __all_exceptions__.get(result['error']['code'], WykopAPIError)
-            raise exception_class(result['error']['code'], 
-                                result['error']['message'].encode(sys.stdout.encoding))
+            exception_code = result['error']['code']
+            exception_encoding = getattr(sys.stdout, 'encoding', 'utf-8')
+            exception_message = force_binary(result['error']['message'], exception_encoding)
+            exception_class = __all_exceptions__.get(exception_code, WykopAPIError)
+            raise exception_class(exception_code, exception_message)
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[], 
                 api_params={}, post_params={}, file_params={}, raw_response=False):
         self.logger.debug("Making request")
-        post_params = dictmap(post_params, lambda x: x.encode('utf-8') if isinstance(x, unicode) else x)
+        
+        rtype = force_text(rtype)
+        rmethod = force_text(rmethod)
+        post_params = dictmap(force_text, post_params)
+        api_params = dictmap(force_text, api_params)
+        
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
         apisign = self.get_request_sign(url, post_params)
         response = self._request(url, post_params, apisign, file_params)
@@ -285,7 +324,7 @@ class WykopAPI:
         post_params = {'body': body}
         file_params = {}
         if embed:
-            if isinstance(embed, file):
+            if hasattr(embed, 'read'):
                 file_params.update({'embed': embed})
             else:
                 post_params.update({'embed': embed})
@@ -515,7 +554,7 @@ class WykopAPI:
         post_params = {'body': body}
         file_params = {}
         if embed:
-            if isinstance(embed, file):
+            if hasattr(embed, 'read'):
                 file_params.update({'embed': embed})
             else:
                 post_params.update({'embed': embed})
@@ -626,10 +665,15 @@ class WykopAPI:
     @login_required
     def send_message(self, username, body, embed=None):
         post_params = {'body': body}
+        file_params = {}
         if embed:
-            post_params.update({'embed': embed})
+            if hasattr(embed, 'read'):
+                file_params.update({'embed': embed})
+            else:
+                post_params.update({'embed': embed})
         return self.request('pm', 'sendmessage', [username],
-                            post_params=post_params)
+                            post_params=post_params, 
+                            file_params=file_params)
 
     @login_required
     def delete_conversation(self, username):

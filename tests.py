@@ -21,6 +21,8 @@ class WykopAPITests(unittest.TestCase):
         except KeyError:
             self.fail("SECRETKEY not set") 
         self.api = WykopAPI(appkey, secretkey)
+        self.api.login = os.environ['LOGIN']
+        self.api.accountkey = os.environ['ACCOUNTKEY']
 
     def test_get_link_success(self):
         self.api.get_link(1)
@@ -109,6 +111,11 @@ class WykopAPITests(unittest.TestCase):
 
     def test_get_observatory_entries_comments_success(self):
         self.api.get_observatory_entries_comments()
+        
+        self.assert_(True)
+
+    def test_add_entry_success(self):
+        self.api.add_entry(body='#wykopsdk #wykopsdktest', embed=open('doge.png', 'rb'))
         
         self.assert_(True)
 
