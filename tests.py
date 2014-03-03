@@ -115,7 +115,9 @@ class WykopAPITests(unittest.TestCase):
         self.assert_(True)
 
     def test_add_entry_success(self):
-        self.api.add_entry(body='#wykopsdk #wykopsdktest', embed=open('doge.png', 'rb'))
+        f = open('doge.png', 'rb')
+        self.api.add_entry(body='#wykopsdk #wykopsdktest', embed=f)
+        f.close()
         
         self.assert_(True)
 

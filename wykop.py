@@ -8,14 +8,16 @@ from __future__ import unicode_literals
 import logging
 import hashlib
 import sys
+import mimetypes
 from datetime import date, timedelta
 
 try:
     from urllib.parse import urlunparse, urlencode
+    from urllib.request import pathname2url
 # pytho2 fallback
 except ImportError:
     from urlparse import urlunparse
-    from urllib import urlencode
+    from urllib import urlencode, pathname2url
 
 try: 
     import simplejson as json
@@ -35,7 +37,7 @@ except ImportError:
     except ImportError:
         from urllib2 import Request, urlopen, HTTPError, URLError
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 # python2 unicode fallback
 if sys.version < '3':
@@ -60,6 +62,9 @@ def paramsencode(d):
 
 def dictmap(f, d):
     return dict([(k_v[0], f(k_v[1])) for k_v in iter(d.items())])
+
+def mimetype(filename):
+    return mimetypes.guess_type(pathname2url(filename))[0]
 
 def login_required(method):
     def decorator(self, *args, **kwargs):
@@ -273,6 +278,7 @@ class WykopAPI:
                 'User-Agent': "wykop-sdk/%s" % __version__,
                 'apisign': sign,
             }
+            files = dictmap(lambda x: (x.name, x, mimetype(x.name)), files)
             req = requests.request(method, url, data=data, 
                                    headers=headers, files=files)
             return force_text(req.content)
