@@ -4,6 +4,9 @@ Wykop API Python SDK
 .. role:: strike
     :class: strike
 
+.. image:: https://badge.fury.io/py/wykop-sdk.png
+    :target: http://badge.fury.io/py/wykop-sdk
+
 Biblioteka ta jest implementacją `Wykop API`_ w Python.
 
 .. _Wykop API: http://www.wykop.pl/developers/api/
