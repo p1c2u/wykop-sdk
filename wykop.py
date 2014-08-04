@@ -47,24 +47,30 @@ else:
     text_type = str
     binary_type = bytes
 
+
 def force_text(x, encoding='utf-8'):
     if hasattr(x, 'decode'):
         return x.decode(encoding)
     return text_type(x)
+
 
 def force_binary(x, encoding='utf-8'):
     if hasattr(x, 'encode'):
         return x.encode(encoding)
     return binary_type(x)
 
+
 def paramsencode(d):
     return ','.join(['%s,%s' % (k, v) for (k, v) in list(d.items())])
+
 
 def dictmap(f, d):
     return dict([(k_v[0], f(k_v[1])) for k_v in iter(d.items())])
 
+
 def mimetype(filename):
     return mimetypes.guess_type(pathname2url(filename))[0]
+
 
 def login_required(method):
     def decorator(self, *args, **kwargs):
@@ -78,95 +84,125 @@ def login_required(method):
             return method(self, *args, **kwargs)
     return decorator
 
+
 class AttrDict(dict):
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
+
 
 class WykopAPIError(Exception):
     def __init__(self, type_, message):
         Exception.__init__(self, message)
         self.type = type_
 
+
 class InvalidAPIKeyError(WykopAPIError):
     pass
+
 
 class InvalidParamsError(WykopAPIError):
     pass
 
+
 class NotEnoughParamsError(WykopAPIError):
     pass
+
 
 class AppWritePermissionsError(WykopAPIError):
     pass
 
+
 class DailtyRequestLimitError(WykopAPIError):
     pass
+
 
 class InvalidAPISignError(WykopAPIError):
     pass
 
+
 class AppPermissionsError(WykopAPIError):
     pass
+
 
 class SessionAppPermissionError(WykopAPIError):
     pass
 
+
 class InvalidUserKeyError(WykopAPIError):
     pass
+
 
 class InvalidSessionKeyError(WykopAPIError):
     pass
 
+
 class UserDoesNotExistError(WykopAPIError):
     pass
+
 
 class InvalidCredentialsError(WykopAPIError):
     pass
 
+
 class CredentialsMissingError(WykopAPIError):
     pass
+
 
 class IPBannedError(WykopAPIError):
     pass
 
+
 class UserBannedError(WykopAPIError):
     pass
+
 
 class OwnVoteError(WykopAPIError):
     pass
 
+
 class InvalidLinkIDError(WykopAPIError):
     pass
+
 
 class OwnObserveError(WykopAPIError):
     pass
 
+
 class CommentEditError(WykopAPIError):
     pass
+
 
 class EntryEditError(WykopAPIError):
     pass
 
+
 class RemovedLinkError(WykopAPIError):
     pass
+
 
 class PrivateLinkError(WykopAPIError):
     pass
 
+
 class EntryDoesNotExistError(WykopAPIError):
     pass
+
 
 class QueryTooShortError(WykopAPIError):
     pass
 
+
 class CommentDoesNotExistError(WykopAPIError):
     pass
+
 
 class NiceTryError(WykopAPIError):
     pass
 
+
 class UnreachableAPIError(WykopAPIError):
     pass
+
 
 class NoIndexError(WykopAPIError):
     pass
@@ -201,6 +237,7 @@ __all_exceptions__ = {
     1001:   UnreachableAPIError,
     1002:   NoIndexError
 }
+
 
 class WykopAPI:
 
