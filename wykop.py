@@ -266,7 +266,7 @@ class WykopAPI:
 
         pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
         path = "/".join(pathparts)
-        urlparts = (self._protocol, self._domain,  path, '', '', '')
+        urlparts = (self._protocol, self._domain, path, '', '', '')
         return str(urlunparse(urlparts))
 
     def authenticate(self, login=None, accountkey=None, password=None):
@@ -518,7 +518,7 @@ class WykopAPI:
 
     def search_links(self, q, page=1, what='all', sort='best',
                      when='all', date_from=None, date_to=None, votes=0):
-        date_from = date_to or (date.today() - timedelta(days=30) ).strftime("%d/%m/%Y")
+        date_from = date_to or (date.today() - timedelta(days=30)).strftime("%d/%m/%Y")
         date_to = date_to or date.today().strftime("%d/%m/%Y")
         api_params = {'appkey': self.appkey, 'page': page}
         post_params = {'q': q, 'what': what, 'sort': sort, 'when': when,
@@ -703,7 +703,6 @@ class WykopAPI:
     @login_required
     def get_conversation(self, username):
         return self.request('pm', 'conversation', [username])
-
 
     @login_required
     def send_message(self, username, body, embed=None):
