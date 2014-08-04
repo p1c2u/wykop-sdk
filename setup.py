@@ -10,7 +10,7 @@ setup(
     name='wykop-sdk',
     version='0.2.2',
     description='Client library for Wykop API',
-    
+
     long_description=open("README.rst").read(),
     author='Artur Maciag',
     author_email='maciag.artur@gmail.com',
