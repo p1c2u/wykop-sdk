@@ -244,7 +244,8 @@ class WykopAPI:
     _protocol = 'http'
     _domain = "a.wykop.pl"
 
-    def __init__(self, appkey, secretkey, login=None, accountkey=None, password=None):
+    def __init__(self, appkey, secretkey, login=None, accountkey=None,
+                 password=None):
         self.logger = logging.getLogger("wykop.WykopAPI")
 
         self.appkey = appkey
@@ -274,7 +275,8 @@ class WykopAPI:
         self.accountkey = accountkey or self.accountkey
         self.password = password or self.password
         if not self.login or not (self.accountkey or self.password):
-            raise WykopAPIError(0, "Login or (password or account key) not set")
+            raise WykopAPIError(0,
+                                "Login or (password or account key) not set")
         res = self.user_login(self.login, self.accountkey, self.password)
         self.userkey = res['userkey']
 
@@ -284,14 +286,16 @@ class WykopAPI:
         url_bytes = force_binary(url)
         values_bytes = force_binary(values)
         secretkey_bytes = force_binary(self.secretkey)
-        return hashlib.md5(secretkey_bytes + url_bytes + values_bytes).hexdigest()
+        return hashlib.md5(secretkey_bytes + url_bytes
+                           + values_bytes).hexdigest()
 
     def urllib2_request(self, url, data, sign, files=None):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" %
                           (str(url), str(data), str(sign)))
 
         if files and not USE_REQUESTS:
-            raise NotImplementedError("Install requests package to send files.")
+            raise NotImplementedError("Install requests package to send "
+                                      "files.")
 
         data_bytes = force_binary(urlencode(data))
         req = Request(url, data_bytes)
@@ -334,13 +338,16 @@ class WykopAPI:
         if 'error' in result:
             exception_code = result['error']['code']
             exception_encoding = getattr(sys.stdout, 'encoding', 'utf-8')
-            exception_message = force_binary(result['error']['message'], exception_encoding)
-            exception_class = __all_exceptions__.get(exception_code, WykopAPIError)
+            exception_message = force_binary(result['error']['message'],
+                                             exception_encoding)
+            exception_class = __all_exceptions__.get(exception_code,
+                                                     WykopAPIError)
             raise exception_class(exception_code, exception_message)
         return result
 
     def request(self, rtype, rmethod, rmethod_params=[],
-                api_params={}, post_params={}, file_params={}, raw_response=False):
+                api_params={}, post_params={}, file_params={},
+                raw_response=False):
         self.logger.debug("Making request")
 
         rtype = force_text(rtype)
@@ -476,7 +483,8 @@ class WykopAPI:
 
     @login_required
     def get_profile_buried(self, username, page=1):
-        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
         return self.request('profile', 'buried', [username],
                             api_params=api_params)
 
@@ -489,12 +497,14 @@ class WykopAPI:
         return self.request('profile', 'unobserve', [username])
 
     def get_profile_followers(self, username, page=1):
-        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
         return self.request('profile', 'followers', [username],
                             api_params=api_params)
 
     def get_profile_followed(self, username, page=1):
-        api_params = {'appkey': self.appkey, 'userkey': self.userkey, 'page': page}
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
         return self.request('profile', 'followed', [username],
                             api_params=api_params)
 
@@ -514,11 +524,12 @@ class WykopAPI:
 
     def search_links(self, q, page=1, what='all', sort='best',
                      when='all', date_from=None, date_to=None, votes=0):
-        date_from = date_to or (date.today() - timedelta(days=30)).strftime("%d/%m/%Y")
+        date_from = date_to or (date.today() - timedelta(days=30))
+        date_from_str = date_from.strftime("%d/%m/%Y")
         date_to = date_to or date.today().strftime("%d/%m/%Y")
         api_params = {'appkey': self.appkey, 'page': page}
         post_params = {'q': q, 'what': what, 'sort': sort, 'when': when,
-                       'from': date_from, 'to': date_to, 'votes': votes}
+                       'from': date_from_str, 'to': date_to, 'votes': votes}
         return self.request('search', 'links',
                             api_params=api_params,
                             post_params=post_params)
@@ -641,11 +652,13 @@ class WykopAPI:
 
     @login_required
     def vote_entry_comment(self, entry_id, comment_id):
-        return self.request('entries', 'vote', ['comment', entry_id, comment_id])
+        return self.request('entries', 'vote', ['comment', entry_id,
+                                                comment_id])
 
     @login_required
     def unvote_entry_comment(self, entry_id, comment_id):
-        return self.request('entries', 'unvote', ['comment', entry_id, comment_id])
+        return self.request('entries', 'unvote', ['comment', entry_id,
+                                                  comment_id])
 
     # Rank
 
