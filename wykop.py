@@ -305,8 +305,6 @@ class WykopAPI:
             raise WykopAPIError(0, str(e.code))
         except URLError as e:
             raise WykopAPIError(0, str(e.reason))
-        except Exception as e:
-            raise WykopAPIError(0, 'Unhandled exception')
 
     def requests_request(self, url, data, sign, files):
         try:
@@ -321,8 +319,6 @@ class WykopAPI:
             return force_text(req.content)
         except requests.exceptions.RequestException as e:
             raise WykopAPIError(0, str(e.reason))
-        except Exception as e:
-            raise WykopAPIError(0, 'Unhandled exception')
 
     def _request(self, url, data, sign, files=None):
         self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" %
