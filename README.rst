@@ -20,7 +20,7 @@ Przykładowe użycie:
     api = wykop.WykopAPI(klucz_aplikacji, sekret_aplikacji)
     profile = api.get_profile("m__b")
 
-Uwierzytelnienie 
+Uwierzytelnienie
 -------------------
 
 Aby wykonywać działania jako użytkownik zalogowany przed wykonaniem metody należy się uwierzytenić.
@@ -35,7 +35,7 @@ Przykładowe użycie metody wymagającej uwierzytelnienia:
     api.authenticate(login, klucz_polaczenia)
     profile = api.observe_profile("m__b")
 
-Zdefiniowane metody 
+Zdefiniowane metody
 -------------------
 
 Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
@@ -232,26 +232,26 @@ gdzie:
 | {"appkey": 12345} | parametry API           |
 +-------------------+-------------------------+
 
-Odpowiedzi 
+Odpowiedzi
 -------------------
 
 Wyróżniamy 3 typy odpowiedzi:
 
-- logiczny, np. metoda observe_profile: 
+- logiczny, np. metoda observe_profile:
   ::
-  
+
       >>> print api.observe_profile("m__b")
       [True]
 
 - obiekt, np. metoda get_profile:
   ::
-  
+
       >>> print api.get_profile("m__b")
       {'author_group': 5, 'buries': None, 'rank': 274, 'links_published': 41, 'gg': '', 'groups': 2, 'entries': 203, .. }
 
 - lista obiektów, np. metoda get_link_digs
   ::
-  
+
       >> print api.get_link_digs(12345)
       [{'author_group': 2, 'author_sex': 'male', .. }, {'author_group': 2, 'author_sex': 'male', .. }]
 
