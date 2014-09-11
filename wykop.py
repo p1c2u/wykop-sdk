@@ -7,17 +7,18 @@ from __future__ import unicode_literals
 
 import logging
 import hashlib
+import base64
 import sys
 import mimetypes
 from datetime import date, timedelta
 
 try:
-    from urllib.parse import urlunparse, urlencode
+    from urllib.parse import urlunparse, urlencode, quote_plus
     from urllib.request import pathname2url
 # pytho2 fallback
 except ImportError:
     from urlparse import urlunparse
-    from urllib import urlencode, pathname2url
+    from urllib import urlencode, pathname2url, quote_plus
 
 try:
     import simplejson as json
@@ -37,7 +38,7 @@ except ImportError:
     except ImportError:
         from urllib2 import Request, urlopen, HTTPError, URLError
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 # python2 unicode fallback
 if sys.version < '3':
@@ -49,13 +50,13 @@ else:
 
 
 def force_text(x, encoding='utf-8'):
-    if hasattr(x, 'decode'):
+    if not isinstance(x, text_type) and hasattr(x, 'decode'):
         return x.decode(encoding)
     return text_type(x)
 
 
 def force_binary(x, encoding='utf-8'):
-    if hasattr(x, 'encode'):
+    if not isinstance(x, binary_type) and hasattr(x, 'encode'):
         return x.encode(encoding)
     return binary_type(x)
 
@@ -188,6 +189,10 @@ class EntryDoesNotExistError(WykopAPIError):
     pass
 
 
+class EntryLimitExceededError(WykopAPIError):
+    pass
+
+
 class QueryTooShortError(WykopAPIError):
     pass
 
@@ -231,6 +236,7 @@ __all_exceptions__ = {
     41:     RemovedLinkError,
     42:     PrivateLinkError,
     61:     EntryDoesNotExistError,
+    62:     EntryLimitExceededError,
     71:     QueryTooShortError,
     81:     CommentDoesNotExistError,
     999:    NiceTryError,
@@ -281,7 +287,7 @@ class WykopAPI:
         self.userkey = res['userkey']
 
     def get_request_sign(self, url, post_params={}):
-        values_list = [post_params[key] for key in sorted(post_params.keys())]
+        values_list = [force_binary(post_params[key]) for key in sorted(post_params.keys())]
         values = ",".join(values_list)
         url_bytes = force_binary(url)
         values_bytes = force_binary(values)
@@ -352,7 +358,7 @@ class WykopAPI:
 
         rtype = force_text(rtype)
         rmethod = force_text(rmethod)
-        post_params = dictmap(force_text, post_params)
+        post_params = dictmap(force_binary, post_params)
         api_params = dictmap(force_text, api_params)
 
         url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
@@ -362,6 +368,18 @@ class WykopAPI:
         if raw_response:
             return response
         return self._parse_json(response)
+
+    # Connect
+
+    def get_connect_url(self, redirect_url):
+        redirect_url_encoded = quote_plus(base64.b64encode(redirect_url))
+        apisign = self.get_request_sign(redirect_url)
+        api_params = {'redirect': redirect_url_encoded, 'secure': apisign}
+        return self._construct_url('user', 'connect', api_params=api_params)
+
+    def get_connect_data(self, data):
+        data_decoded = self._parse_json(base64.decodestring(data))
+        return data_decoded['appkey'], data_decoded['login'], data_decoded['token']
 
     # Comments
 
@@ -448,6 +466,74 @@ class WykopAPI:
         return self.request('links', 'upcoming',
                             api_params=api_params)
 
+    # MyWykop
+
+    @login_required
+    def get_mywykop(self, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
+        return self.request('mywykop', 'index',
+                            api_params=api_params)
+
+    @login_required
+    def get_mywykop_tags(self, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
+        return self.request('mywykop', 'tags',
+                            api_params=api_params)
+
+    @login_required
+    def get_mywykop_users(self, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
+        return self.request('mywykop', 'users',
+                            api_params=api_params)
+
+    @login_required
+    def get_notifications(self, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
+        return self.request('mywykop', 'notifications',
+                            api_params=api_params)
+
+    @login_required
+    def get_notifications_count(self):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey}
+        return self.request('mywykop', 'notificationscount',
+                            api_params=api_params)
+
+    @login_required
+    def get_hashtags_notifications(self, page=1):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey,
+                      'page': page}
+        return self.request('mywykop', 'hashtagsnotifications',
+                            api_params=api_params)
+
+    @login_required
+    def get_hashtags_notifications_count(self):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey}
+        return self.request('mywykop', 'hashtagsnotificationscount',
+                            api_params=api_params)
+
+    @login_required
+    def mark_as_read_notifications(self):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey}
+        return self.request('mywykop', 'readnotifications',
+                            api_params=api_params)
+
+    @login_required
+    def mark_as_read_hashtags_notifications(self):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey}
+        return self.request('mywykop', 'readhashtagsnotifications',
+                            api_params=api_params)
+
+    @login_required
+    def mark_as_read_notification(self, notification_id):
+        api_params = {'appkey': self.appkey, 'userkey': self.userkey}
+        return self.request('mywykop', 'markasreadnotification',
+                            [notification_id],
+                            api_params=api_params)
+
     # Popular
 
     def get_popular_promoted(self):
@@ -476,6 +562,11 @@ class WykopAPI:
         return self.request('profile', 'commented', [username],
                             api_params=api_params)
 
+    def get_profile_comments(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'comments', [username],
+                            api_params=api_params)
+
     def get_profile_digged(self, username, page=1):
         api_params = {'appkey': self.appkey, 'page': page}
         return self.request('profile', 'digged', [username],
@@ -496,6 +587,14 @@ class WykopAPI:
     def unobserve_profile(self, username):
         return self.request('profile', 'unobserve', [username])
 
+    @login_required
+    def block_profile(self, username):
+        return self.request('profile', 'block', [username])
+
+    @login_required
+    def unblock_profile(self, username):
+        return self.request('profile', 'unblock', [username])
+
     def get_profile_followers(self, username, page=1):
         api_params = {'appkey': self.appkey, 'userkey': self.userkey,
                       'page': page}
@@ -511,6 +610,11 @@ class WykopAPI:
     def get_profile_favorites(self, username, page=1):
         api_params = {'appkey': self.appkey, 'page': page}
         return self.request('profile', 'favorites', [username],
+                            api_params=api_params)
+
+    def get_profile_entries(self, username, page=1):
+        api_params = {'appkey': self.appkey, 'page': page}
+        return self.request('profile', 'entries', [username],
                             api_params=api_params)
 
     # Search
