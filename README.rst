@@ -85,6 +85,20 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +-------------------+--------------------------------+
 | Upcoming          | get_links_upcoming             |
 +-------------------+--------------------------------+
+| **MyWykop**                                        |
++-------------------+--------------------------------+
+| Index             | get_mywykop                    |
++-------------------+--------------------------------+
+| Tags              | get_mywykop_tags               |
++-------------------+--------------------------------+
+| Users             | get_mywykop_users              |
++-------------------+--------------------------------+
+| Notifications     | get_notifications              |
++-------------------+--------------------------------+
+| NotificationsCount| get_notifications_count        |
++-------------------+--------------------------------+
+| ReadNotifications | mark_as_read_notifications     |
++-------------------+--------------------------------+
 | **Popular**                                        |
 +-------------------+--------------------------------+
 | Promoted          | get_popular_promoted           |
@@ -231,6 +245,23 @@ gdzie:
 +-------------------+-------------------------+
 | {"appkey": 12345} | parametry API           |
 +-------------------+-------------------------+
+
+Wykop Connect
+-------------------
+
+Możliwe jest też łączenie konta użytkownika z aplikacją
+
+Generowanie linku do Wykop Connect
+
+::
+
+    url = api.get_connect_url("http://hostname.pl")
+
+Dekodowanie danych Wykop Connect
+
+::
+
+    appkey, login, token = api.get_connect_data(encoded_data)
 
 Odpowiedzi
 -------------------
