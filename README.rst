@@ -193,7 +193,7 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +-------------------+--------------------------------+
 | Comments          | get_observatory_comments       |
 +-------------------+--------------------------------+
-| Entres            | get_observatory_entries        |
+| Entries            | get_observatory_entries        |
 +-------------------+--------------------------------+
 | EntriesComments   | get_observatory_entres_comments|
 +-------------------+--------------------------------+
