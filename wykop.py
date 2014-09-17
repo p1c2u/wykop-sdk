@@ -249,6 +249,7 @@ class WykopAPI:
 
     _protocol = 'http'
     _domain = "a.wykop.pl"
+    _output = "clear" #Ustawienie formatu odpowiedzi: clear, lub puste
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
                  password=None):
@@ -356,6 +357,8 @@ class WykopAPI:
                 raw_response=False):
         self.logger.debug("Making request")
 
+        if(self._output):
+            api_params['output'] = self._output
         rtype = force_text(rtype)
         rmethod = force_text(rmethod)
         post_params = dictmap(force_binary, post_params)
