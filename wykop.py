@@ -251,7 +251,7 @@ class WykopAPI:
     _domain = "a.wykop.pl"
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
-                 password=None, output=None):
+                 password=None, output=' '):
         self.logger = logging.getLogger("wykop.WykopAPI")
 
         self.appkey = appkey
