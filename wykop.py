@@ -269,6 +269,8 @@ class WykopAPI:
         rmethod_params = tuple(map(str, rmethod_params))
         # appkey is default for api_params
         api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
+        if self.output:
+            api_params['output'] = self.output
         api_params_all.update(api_params)
         api_params = paramsencode(api_params_all)
 
@@ -357,8 +359,6 @@ class WykopAPI:
                 raw_response=False):
         self.logger.debug("Making request")
 
-        if(self.output):
-            api_params['output'] = self.output
         rtype = force_text(rtype)
         rmethod = force_text(rmethod)
         post_params = dictmap(force_binary, post_params)
