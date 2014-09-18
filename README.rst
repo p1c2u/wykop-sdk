@@ -193,7 +193,7 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +-------------------+--------------------------------+
 | Comments          | get_observatory_comments       |
 +-------------------+--------------------------------+
-| Entres            | get_observatory_entries        |
+| Entries           | get_observatory_entries        |
 +-------------------+--------------------------------+
 | EntriesComments   | get_observatory_entres_comments|
 +-------------------+--------------------------------+
@@ -295,6 +295,19 @@ Każdy obiekt z odpowiedzi jest typu słownikowego (dict) z możliwością dost�
     12155
     >> profile.diggs
     12155
+
+Filtrowanie odpowiedzi
+----------------------
+Aby odfiltrować z odpowiedzi kod HTML, należy wywołać klasę z parametrem output='clear'
+
+::
+
+    import wykop
+
+    api = wykop.WykopAPI(klucz_aplikacji, sekret_aplikacji, output='clear')
+    api.authenticate(login, klucz_polaczenia)
+    profile = api.observe_profile("m__b")
+
 
 Zgłaszanie błędów
 -----------------

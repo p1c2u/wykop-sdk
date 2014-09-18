@@ -251,7 +251,7 @@ class WykopAPI:
     _domain = "a.wykop.pl"
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
-                 password=None):
+                 password=None, output=' '):
         self.logger = logging.getLogger("wykop.WykopAPI")
 
         self.appkey = appkey
@@ -260,6 +260,7 @@ class WykopAPI:
         self.accountkey = accountkey
         self.password = password
         self.userkey = ''
+        self.output = output
         if login and accountkey:
             self.authenticate()
 
@@ -267,7 +268,7 @@ class WykopAPI:
         # map all params to string
         rmethod_params = tuple(map(str, rmethod_params))
         # appkey is default for api_params
-        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
+        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey, 'output': self.output}
         api_params_all.update(api_params)
         api_params = paramsencode(api_params_all)
 
