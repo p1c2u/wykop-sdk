@@ -268,9 +268,7 @@ class WykopAPI:
         # map all params to string
         rmethod_params = tuple(map(str, rmethod_params))
         # appkey is default for api_params
-        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey}
-        if self.output:
-            api_params['output'] = self.output
+        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey, 'output': self.output}
         api_params_all.update(api_params)
         api_params = paramsencode(api_params_all)
 
