@@ -38,7 +38,7 @@ except ImportError:
     except ImportError:
         from urllib2 import Request, urlopen, HTTPError, URLError
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 # python2 unicode fallback
 if sys.version < '3':
@@ -251,7 +251,7 @@ class WykopAPI:
     _domain = "a.wykop.pl"
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
-                 password=None, output=' '):
+                 password=None, output=''):
         self.logger = logging.getLogger("wykop.WykopAPI")
 
         self.appkey = appkey
@@ -288,7 +288,7 @@ class WykopAPI:
         self.userkey = res['userkey']
 
     def get_request_sign(self, url, post_params={}):
-        values_list = [force_binary(post_params[key]) for key in sorted(post_params.keys())]
+        values_list = [force_text(post_params[key]) for key in sorted(post_params.keys())]
         values = ",".join(values_list)
         url_bytes = force_binary(url)
         values_bytes = force_binary(values)

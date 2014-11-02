@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='wykop-sdk',
-    version='0.2.3',
+    version='0.2.4',
     description='Client library for Wykop API',
 
     long_description=open("README.rst").read(),

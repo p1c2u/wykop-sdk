@@ -7,7 +7,7 @@ import unittest
 import os
 from datetime import date
 
-from wykop import WykopAPI
+import wykop
 
 
 class WykopAPITests(unittest.TestCase):
@@ -21,9 +21,20 @@ class WykopAPITests(unittest.TestCase):
             secretkey = os.environ['SECRETKEY']
         except KeyError:
             self.fail("SECRETKEY not set")
-        self.api = WykopAPI(appkey, secretkey)
+        self.api = wykop.WykopAPI(appkey, secretkey)
         self.api.login = os.environ['LOGIN']
         self.api.accountkey = os.environ['ACCOUNTKEY']
+
+    def force_urllib2(self):
+        import contextlib
+        from urllib2 import Request, urlopen, HTTPError, URLError
+        
+        wykop.USE_REQUESTS = False
+        wykop.contextlib = contextlib
+        wykop.Request = Request
+        wykop.urlopen = urlopen
+        wykop.HTTPError = HTTPError
+        wykop.URLError = URLError
 
     def test_get_link_success(self):
         self.api.get_link(1)
