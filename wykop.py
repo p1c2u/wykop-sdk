@@ -245,7 +245,7 @@ __all_exceptions__ = {
 }
 
 
-class WykopAPI:
+class WykopAPI(object):
 
     _protocol = 'http'
     _domain = "a.wykop.pl"

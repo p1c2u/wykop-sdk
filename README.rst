@@ -20,6 +20,21 @@ Przykładowe użycie:
     api = wykop.WykopAPI(klucz_aplikacji, sekret_aplikacji)
     profile = api.get_profile("m__b")
 
+Instalacja
+-------------------
+
+Zalecana jest instalacja wykop-sdk poprzez pip:
+
+::
+
+    $ pip install wykop-sdk
+
+Alternatywnie możesz pobrać kod i zainstalować bezpośrednio z repozytorium:
+
+::
+
+    $ pip install -e git+https://github.com/p1c2u/wykop-sdk.git#egg=wykop-sdk
+
 Uwierzytelnienie
 -------------------
 
