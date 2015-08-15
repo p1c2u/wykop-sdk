@@ -1,4 +1,4 @@
-Wykop API Python SDK
+﻿Wykop API Python SDK
 ====================
 
 .. role:: strike
@@ -64,7 +64,7 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 +-------------------+--------------------------------+
 | Plus              | plus_comment                   |
 +-------------------+--------------------------------+
-| Minus             | minus_commant                  |
+| Minus             | minus_comment                  |
 +-------------------+--------------------------------+
 | Edit              | edit_comment                   |
 +-------------------+--------------------------------+
