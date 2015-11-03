@@ -1,386 +1,216 @@
-'''
-Created on 18-12-2012
-
-@author: maciag.artur
-'''
-from __future__ import unicode_literals
-
-import logging
-import hashlib
 import base64
-import sys
-import mimetypes
+import hashlib
+import logging
 from datetime import date, timedelta
 
-try:
-    from urllib.parse import urlunparse, urlencode, quote_plus
-    from urllib.request import pathname2url
-# pytho2 fallback
-except ImportError:
-    from urlparse import urlunparse
-    from urllib import urlencode, pathname2url, quote_plus
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
-# try requests module
-try:
-    import requests
-    USE_REQUESTS = True
-except ImportError:
-    USE_REQUESTS = False
-    import contextlib
-    try:
-        from urllib.request import Request, urlopen, HTTPError, URLError
-    # pytho2 fallback
-    except ImportError:
-        from urllib2 import Request, urlopen, HTTPError, URLError
-
-__version__ = "0.2.4"
-
-# python2 unicode fallback
-if sys.version < '3':
-    text_type = unicode
-    binary_type = str
-else:
-    text_type = str
-    binary_type = bytes
-
-
-def force_text(x, encoding='utf-8'):
-    if not isinstance(x, text_type) and hasattr(x, 'decode'):
-        return x.decode(encoding)
-    return text_type(x)
-
-
-def force_binary(x, encoding='utf-8'):
-    if not isinstance(x, binary_type) and hasattr(x, 'encode'):
-        return x.encode(encoding)
-    return binary_type(x)
-
-
-def paramsencode(d):
-    return ','.join(['%s,%s' % (k, v) for (k, v) in list(d.items())])
-
-
-def dictmap(f, d):
-    return dict([(k_v[0], f(k_v[1])) for k_v in iter(d.items())])
-
-
-def mimetype(filename):
-    return mimetypes.guess_type(pathname2url(filename))[0]
-
-
-def login_required(method):
-    def decorator(self, *args, **kwargs):
-        if not self.userkey:
-            self.authenticate()
-        try:
-            return method(self, *args, **kwargs)
-        # get new userkey on invalid key
-        except InvalidUserKeyError:
-            self.authenticate()
-            return method(self, *args, **kwargs)
-    return decorator
-
-
-class AttrDict(dict):
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-
-
-class WykopAPIError(Exception):
-    def __init__(self, type_, message):
-        Exception.__init__(self, message)
-        self.type = type_
-
-
-class InvalidAPIKeyError(WykopAPIError):
-    pass
-
-
-class InvalidParamsError(WykopAPIError):
-    pass
-
-
-class NotEnoughParamsError(WykopAPIError):
-    pass
-
-
-class AppWritePermissionsError(WykopAPIError):
-    pass
-
-
-class DailtyRequestLimitError(WykopAPIError):
-    pass
-
-
-class InvalidAPISignError(WykopAPIError):
-    pass
-
-
-class AppPermissionsError(WykopAPIError):
-    pass
-
-
-class SessionAppPermissionError(WykopAPIError):
-    pass
-
-
-class InvalidUserKeyError(WykopAPIError):
-    pass
-
-
-class InvalidSessionKeyError(WykopAPIError):
-    pass
-
-
-class UserDoesNotExistError(WykopAPIError):
-    pass
-
-
-class InvalidCredentialsError(WykopAPIError):
-    pass
-
-
-class CredentialsMissingError(WykopAPIError):
-    pass
-
-
-class IPBannedError(WykopAPIError):
-    pass
-
-
-class UserBannedError(WykopAPIError):
-    pass
-
-
-class OwnVoteError(WykopAPIError):
-    pass
-
-
-class InvalidLinkIDError(WykopAPIError):
-    pass
-
-
-class OwnObserveError(WykopAPIError):
-    pass
-
-
-class CommentEditError(WykopAPIError):
-    pass
-
-
-class EntryEditError(WykopAPIError):
-    pass
-
-
-class RemovedLinkError(WykopAPIError):
-    pass
-
-
-class PrivateLinkError(WykopAPIError):
-    pass
-
-
-class EntryDoesNotExistError(WykopAPIError):
-    pass
-
-
-class EntryLimitExceededError(WykopAPIError):
-    pass
-
-
-class QueryTooShortError(WykopAPIError):
-    pass
-
-
-class CommentDoesNotExistError(WykopAPIError):
-    pass
-
-
-class NiceTryError(WykopAPIError):
-    pass
-
-
-class UnreachableAPIError(WykopAPIError):
-    pass
-
-
-class NoIndexError(WykopAPIError):
-    pass
-
-__all_exceptions__ = {
-    1:      InvalidAPIKeyError,
-    2:      InvalidParamsError,
-    3:      NotEnoughParamsError,
-    4:      AppWritePermissionsError,
-    5:      DailtyRequestLimitError,
-    6:      InvalidAPISignError,
-    7:      AppPermissionsError,
-    8:      SessionAppPermissionError,
-    11:     InvalidUserKeyError,
-    12:     InvalidSessionKeyError,
-    13:     UserDoesNotExistError,
-    14:     InvalidCredentialsError,
-    15:     CredentialsMissingError,
-    17:     IPBannedError,
-    18:     UserBannedError,
-    31:     OwnVoteError,
-    32:     InvalidLinkIDError,
-    33:     OwnObserveError,
-    34:     CommentEditError,
-    35:     EntryEditError,
-    41:     RemovedLinkError,
-    42:     PrivateLinkError,
-    61:     EntryDoesNotExistError,
-    62:     EntryLimitExceededError,
-    71:     QueryTooShortError,
-    81:     CommentDoesNotExistError,
-    999:    NiceTryError,
-    1001:   UnreachableAPIError,
-    1002:   NoIndexError
-}
-
-
-class WykopAPI(object):
-
+from six.moves.urllib.parse import urlunparse, quote_plus
+
+from wykop.api.decorators import login_required
+from wykop.api.exceptions import WykopAPIError
+from wykop.api.parsers import default_parser
+from wykop.api.requesters import default_requester
+from wykop.utils import (
+    dictmap,
+    paramsencode,
+    force_bytes,
+    force_text,
+    get_version,
+)
+
+log = logging.getLogger(__name__)
+
+
+class BaseWykopAPI(object):
+    """
+    Base Wykop API class
+    """
+
+    _client_name = 'wykop-sdk'
     _protocol = 'http'
-    _domain = "a.wykop.pl"
+    _domain = 'a.wykop.pl'
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
-                 password=None, output=''):
-        self.logger = logging.getLogger("wykop.WykopAPI")
-
+                 password=None, output='', response_format='json'):
         self.appkey = appkey
         self.secretkey = secretkey
         self.login = login
         self.accountkey = accountkey
         self.password = password
-        self.userkey = ''
         self.output = output
-        if login and accountkey:
-            self.authenticate()
+        self.format = response_format
+        self.userkey = ''
 
-    def _construct_url(self, rtype, rmethod, rmethod_params=[], api_params={}):
+    def get_method_params(self, *method_params):
+        """
+        Gets request method parameters.
+        """
         # map all params to string
-        rmethod_params = tuple(map(str, rmethod_params))
-        # appkey is default for api_params
-        api_params_all = {'appkey': self.appkey, 'userkey': self.userkey, 'output': self.output}
-        api_params_all.update(api_params)
-        api_params = paramsencode(api_params_all)
+        return tuple(map(str, method_params))
 
-        pathparts = (rtype, rmethod) + rmethod_params + (api_params,)
-        path = "/".join(pathparts)
+    def get_api_params(self, **api_params):
+        """
+        Gets request api parameters.
+        """
+        # default api params
+        api_params_all = {
+            'appkey': self.appkey,
+            'format': self.format,
+            'output': self.output,
+            'userkey': self.userkey,
+        }
+        # update user defined api params
+        api_params_all.update(api_params)
+        # encode api params
+        return paramsencode(api_params_all)
+
+    def get_path(self, rtype, rmethod, *rmethod_params, **api_params):
+        """
+        Gets request path.
+        """
+        method_params = self.get_method_params(*rmethod_params)
+        api_params = self.get_api_params(**api_params)
+
+        pathparts = (rtype, rmethod) + method_params + (api_params,)
+        return '/'.join(pathparts)
+
+    def construct_url(self, rtype, rmethod, rmethod_params=[], api_params={}):
+        """
+        Constructs request url.
+        """
+        path = self.get_path(rtype, rmethod, *rmethod_params, **api_params)
+
         urlparts = (self._protocol, self._domain, path, '', '', '')
         return str(urlunparse(urlparts))
+
+    def get_post_params_values(self, **post_params):
+        """
+        Gets post parameters values list. Required to api sign.
+        """
+        return [force_text(post_params[key])
+                for key in sorted(post_params.keys())]
+
+    def get_api_sign(self, url, **post_params):
+        """
+        Gets request api sign.
+        """
+        post_params_values = self.get_post_params_values(**post_params)
+        post_params_values_str = ",".join(post_params_values)
+        post_params_values_bytes = force_bytes(post_params_values_str)
+        url_bytes = force_bytes(url)
+        secretkey_bytes = force_bytes(self.secretkey)
+        return hashlib.md5(
+            secretkey_bytes + url_bytes + post_params_values_bytes).hexdigest()
+
+    def get_user_agent(self):
+        """
+        Gets User-Agent header.
+        """
+        client_version = get_version()
+        return '/'.join([self._client_name, client_version])
+
+    def get_headers(self, url, **post_params):
+        """
+        Gets request headers.
+        """
+        apisign = self.get_api_sign(url, **post_params)
+        user_agent = self.get_user_agent()
+
+        return {
+            'apisign': apisign,
+            'User-Agent': user_agent,
+        }
+
+    def request(self, rtype, rmethod, rmethod_params=[],
+                api_params={}, post_params={}, file_params={},
+                parser=default_parser, requester=default_requester):
+        """
+        Makes request.
+        """
+        log.debug('Making request')
+
+        # sanitize data
+        rtype = force_text(rtype)
+        rmethod = force_text(rmethod)
+        post_params = dictmap(force_bytes, post_params)
+        api_params = dictmap(force_text, api_params)
+
+        url = self.construct_url(rtype, rmethod, rmethod_params, api_params)
+        headers = self.get_headers(url, **post_params)
+
+        response = requester.make_request(
+            url, post_params, headers, file_params)
+
+        if parser is None:
+            return response
+
+        return parser.parse(response)
+
+
+class WykopAPI(BaseWykopAPI):
+    """
+    Wykop API class
+    """
+
+    def __init__(self, appkey, secretkey, login=None, accountkey=None,
+                 password=None, output='', response_format='json'):
+        super(WykopAPI, self).__init__(
+            appkey, secretkey, login=login, accountkey=accountkey,
+            password=password, output=output, response_format=response_format)
+
+        if self.login and (self.accountkey or self.password):
+            self.authenticate()
 
     def authenticate(self, login=None, accountkey=None, password=None):
         self.login = login or self.login
         self.accountkey = accountkey or self.accountkey
         self.password = password or self.password
+
         if not self.login or not (self.accountkey or self.password):
-            raise WykopAPIError(0,
-                                "Login or (password or account key) not set")
+            raise WykopAPIError(
+                0, 'Login or (password or account key) not set')
+
         res = self.user_login(self.login, self.accountkey, self.password)
         self.userkey = res['userkey']
 
-    def get_request_sign(self, url, post_params={}):
-        values_list = [force_text(post_params[key]) for key in sorted(post_params.keys())]
-        values = ",".join(values_list)
-        url_bytes = force_binary(url)
-        values_bytes = force_binary(values)
-        secretkey_bytes = force_binary(self.secretkey)
-        return hashlib.md5(secretkey_bytes + url_bytes
-                           + values_bytes).hexdigest()
+    def user_login(self, login, accountkey=None, password=None):
+        post_params = {'login': login}
 
-    def urllib2_request(self, url, data, sign, files=None):
-        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" %
-                          (str(url), str(data), str(sign)))
+        if accountkey:
+            post_params['accountkey'] = accountkey
+        if password:
+            post_params['password'] = password
 
-        if files and not USE_REQUESTS:
-            raise NotImplementedError("Install requests package to send "
-                                      "files.")
-
-        data_bytes = force_binary(urlencode(data))
-        req = Request(url, data_bytes)
-        req.add_header('User-Agent', "wykop-sdk/%s" % __version__)
-        req.add_header('apisign', sign)
-
-        try:
-            with contextlib.closing(urlopen(req)) as f:
-                return force_text(f.read())
-        except HTTPError as e:
-            raise WykopAPIError(0, str(e.code))
-        except URLError as e:
-            raise WykopAPIError(0, str(e.reason))
-
-    def requests_request(self, url, data, sign, files):
-        try:
-            method = 'POST' if data or files else 'GET'
-            headers = {
-                'User-Agent': "wykop-sdk/%s" % __version__,
-                'apisign': sign,
-            }
-            files = dictmap(lambda x: (x.name, x, mimetype(x.name)), files)
-            req = requests.request(method, url, data=data,
-                                   headers=headers, files=files)
-            return force_text(req.content)
-        except requests.exceptions.RequestException as e:
-            raise WykopAPIError(0, str(e.reason))
-
-    def _request(self, url, data, sign, files=None):
-        self.logger.debug(" Fetching url: `%s` (POST: %s, apisign: `%s`)" %
-                          (str(url), str(data), str(sign)))
-
-        request_method = self.requests_request if USE_REQUESTS \
-            else self.urllib2_request
-
-        return request_method(url, data, sign, files)
-
-    def _parse_json(self, data):
-        result = json.loads(data, object_hook=lambda x: AttrDict(x))
-        if 'error' in result:
-            exception_code = result['error']['code']
-            exception_encoding = getattr(sys.stdout, 'encoding', 'utf-8')
-            exception_message = force_binary(result['error']['message'],
-                                             exception_encoding)
-            exception_class = __all_exceptions__.get(exception_code,
-                                                     WykopAPIError)
-            raise exception_class(exception_code, exception_message)
-        return result
-
-    def request(self, rtype, rmethod, rmethod_params=[],
-                api_params={}, post_params={}, file_params={},
-                raw_response=False):
-        self.logger.debug("Making request")
-
-        rtype = force_text(rtype)
-        rmethod = force_text(rmethod)
-        post_params = dictmap(force_binary, post_params)
-        api_params = dictmap(force_text, api_params)
-
-        url = self._construct_url(rtype, rmethod, rmethod_params, api_params)
-        apisign = self.get_request_sign(url, post_params)
-        response = self._request(url, post_params, apisign, file_params)
-
-        if raw_response:
-            return response
-        return self._parse_json(response)
+        return self.request('user', 'login', post_params=post_params)
 
     # Connect
 
-    def get_connect_url(self, redirect_url):
+    def get_connect_api_params(self, redirect_url):
+        """
+        Gets request api parameters for wykop connect.
+        """
         redirect_url_encoded = quote_plus(base64.b64encode(redirect_url))
-        apisign = self.get_request_sign(redirect_url)
-        api_params = {'redirect': redirect_url_encoded, 'secure': apisign}
-        return self._construct_url('user', 'connect', api_params=api_params)
+        apisign = self.get_api_sign(redirect_url)
 
-    def get_connect_data(self, data):
-        data_decoded = self._parse_json(base64.decodestring(data))
-        return data_decoded['appkey'], data_decoded['login'], data_decoded['token']
+        return {
+            'redirect': redirect_url_encoded,
+            'secure': apisign,
+        }
+
+    def get_connect_url(self, redirect_url):
+        """
+        Gets url for wykop connect.
+        """
+        api_params = self.get_connect_api_params(redirect_url)
+
+        return self.construct_url('user', 'connect', api_params=api_params)
+
+    def get_connect_data(self, data, parser=default_parser):
+        """
+        Gets decoded data from wykop connect.
+        """
+        decoded = base64.decodestring(data)
+        parsed = parser.parse(decoded)
+        return parsed['appkey'], parsed['login'], parsed['token']
 
     # Comments
 
@@ -388,11 +218,13 @@ class WykopAPI(object):
     def add_comment(self, link_id, comment_id, body, embed=None):
         post_params = {'body': body}
         file_params = {}
+
         if embed:
             if hasattr(embed, 'read'):
                 file_params.update({'embed': embed})
             else:
                 post_params.update({'embed': embed})
+
         return self.request('comments', 'add', [link_id, comment_id],
                             post_params=post_params,
                             file_params=file_params)
@@ -653,17 +485,6 @@ class WykopAPI(object):
 
     # User
 
-    def user_login(self, login, accountkey=None, password=None):
-        post_params = {'login': login}
-
-        if accountkey:
-            post_params['accountkey'] = accountkey
-        if password:
-            post_params['password'] = password
-
-        return self.request('user', 'login',
-                            post_params=post_params)
-
     @login_required
     def get_user_favorites(self):
         return self.request('user', 'favorites')
@@ -708,6 +529,7 @@ class WykopAPI(object):
     def add_entry(self, body, embed=None, channel=None):
         post_params = {'body': body}
         file_params = {}
+
         if embed:
             if hasattr(embed, 'read'):
                 file_params.update({'embed': embed})
@@ -715,6 +537,7 @@ class WykopAPI(object):
                 post_params.update({'embed': embed})
         if channel:
             post_params.update({'channel': channel})
+
         return self.request('entries', 'add',
                             post_params=post_params,
                             file_params=file_params)
@@ -732,8 +555,10 @@ class WykopAPI(object):
     @login_required
     def add_entry_comment(self, entry_id, body, embed):
         post_params = {'body': body}
+
         if embed:
             post_params.update({'embed': embed})
+
         return self.request('entries', 'addcomment', [entry_id],
                             post_params=post_params)
 
@@ -822,11 +647,13 @@ class WykopAPI(object):
     def send_message(self, username, body, embed=None):
         post_params = {'body': body}
         file_params = {}
+
         if embed:
             if hasattr(embed, 'read'):
                 file_params.update({'embed': embed})
             else:
                 post_params.update({'embed': embed})
+
         return self.request('pm', 'sendmessage', [username],
                             post_params=post_params,
                             file_params=file_params)
