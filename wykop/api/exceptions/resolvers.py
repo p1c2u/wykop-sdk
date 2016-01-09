@@ -18,4 +18,4 @@ class ExceptionResolver(object):
     def resolve(self, code, msg, default_class):
         klass = self.get_class(code, default_class)
         message = self.get_message(msg)
-        return klass(code, message)
+        return klass(message)

@@ -17,8 +17,8 @@ class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = [
-            'tests', '--pep8', '--cov', 'wykop', '--cov-report',
-            'term-missing',
+            '-s', 'tests', '--pep8', '--cov', 'wykop', '--cov-report',
+            'term-missing', '--cov-report', 'html',
         ]
         self.test_suite = True
 

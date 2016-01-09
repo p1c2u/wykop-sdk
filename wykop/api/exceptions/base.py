@@ -16,10 +16,7 @@ class WykopAPIError(Exception):
     """
     Base Wykop API exception class
     """
-    def __init__(self, type_, message):
-        Exception.__init__(self, message)
-        self.type = type_
-
+    pass
 
 class InvalidAPIKeyError(WykopAPIError):
     pass

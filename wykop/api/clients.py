@@ -73,7 +73,7 @@ class BaseWykopAPI(object):
         pathparts = (rtype, rmethod) + method_params + (api_params,)
         return '/'.join(pathparts)
 
-    def construct_url(self, rtype, rmethod, rmethod_params=[], api_params={}):
+    def construct_url(self, rtype, rmethod, *rmethod_params, **api_params):
         """
         Constructs request url.
         """
@@ -134,7 +134,7 @@ class BaseWykopAPI(object):
         post_params = dictmap(force_bytes, post_params)
         api_params = dictmap(force_text, api_params)
 
-        url = self.construct_url(rtype, rmethod, rmethod_params, api_params)
+        url = self.construct_url(rtype, rmethod, *rmethod_params, **api_params)
         headers = self.get_headers(url, **post_params)
 
         response = requester.make_request(
@@ -202,7 +202,7 @@ class WykopAPI(BaseWykopAPI):
         """
         api_params = self.get_connect_api_params(redirect_url)
 
-        return self.construct_url('user', 'connect', api_params=api_params)
+        return self.construct_url('user', 'connect', **api_params)
 
     def get_connect_data(self, data, parser=default_parser):
         """
