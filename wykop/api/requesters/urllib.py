@@ -17,16 +17,19 @@ class UrllibRequester(BaseRequester):
     Urllib requester class
     """
 
-    def make_request(self, url, data, headers, files=None):
-        log.debug(" Fetching url: `%s` (POST: %s, headers: `%s`)" %
+    def make_request(self, url, data=None, headers=None, files=None):
+        log.debug(" Fetching url: `%s` (data: %s, headers: `%s`)" %
                   (str(url), str(data), str(headers)))
 
         if files:
             raise NotImplementedError(
                 "Install requests package to send files.")
 
-        data_bytes = force_bytes(urlencode(data))
-        req = Request(url, data_bytes, headers=headers)
+        if headers is None:
+            headers = {}
+
+        data_bytes = force_bytes(urlencode(data)) if data else None
+        req = Request(url, data=data_bytes, headers=headers)
 
         try:
             with contextlib.closing(urlopen(req)) as f:
