@@ -47,17 +47,23 @@ class BaseWykopAPI(object):
         # map all params to string
         return tuple(map(str, method_params))
 
-    def get_api_params(self, **api_params):
+    def get_default_api_params(self):
         """
-        Gets request api parameters.
+        Gets default api parameters.
         """
-        # default api params
-        api_params_all = {
+        return {
             'appkey': self.appkey,
             'format': self.format,
             'output': self.output,
             'userkey': self.userkey,
         }
+
+    def get_api_params(self, **api_params):
+        """
+        Gets request api parameters.
+        """
+        # default api params
+        api_params_all = self.get_default_api_params()
         # update user defined api params
         api_params_all.update(api_params)
         # encode api params
