@@ -6,7 +6,7 @@ from six.moves.urllib.request import pathname2url
 
 
 def paramsencode(d):
-    return ','.join(['%s,%s' % (k, v) for (k, v) in list(d.items())])
+    return ','.join(['%s,%s' % (k, d[k]) for k in sorted(d)])
 
 
 def dictmap(f, d):
