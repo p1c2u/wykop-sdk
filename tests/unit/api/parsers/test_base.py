@@ -1,8 +1,9 @@
 import mock
 import pytest
 
+from wykop.api.exceptions import WykopAPIError
 from wykop.api.exceptions.resolvers import ExceptionResolver
-from wykop.api.parsers.base import BaseParser
+from wykop.api.parsers.base import BaseParser, Error
 
 
 class TestBaseParserInit(object):
@@ -33,8 +34,65 @@ class TestBaseParserResolveException(object):
 
 class TestBaseParserParse(object):
 
+    @mock.patch.object(BaseParser, '_resolve_exception')
+    @mock.patch.object(BaseParser, '_get_error')
+    @mock.patch.object(BaseParser, '_get_response')
+    def test_error(
+            self,
+            mock_get_response,
+            mock_get_error,
+            mock_resolve_exception,
+            base_parser):
+        data = mock.sentinel.data
+        response = mock.sentinel.response
+        error = Error(mock.sentinel.code, mock.sentinel.message)
+        mock_get_response.return_value = response
+        mock_get_error.return_value = error
+        mock_resolve_exception.side_effect = WykopAPIError()
+
+        with pytest.raises(WykopAPIError):
+            base_parser.parse(data)
+
+        mock_get_response.assert_called_once_with(data)
+        mock_get_error.assert_called_once_with(response)
+        mock_resolve_exception.assert_called_once_with(
+            error.code, error.message, WykopAPIError)
+
+    @mock.patch.object(BaseParser, '_resolve_exception')
+    @mock.patch.object(BaseParser, '_get_error')
+    @mock.patch.object(BaseParser, '_get_response')
+    def test_no_error(
+            self,
+            mock_get_response,
+            mock_get_error,
+            mock_resolve_exception,
+            base_parser):
+        data = mock.sentinel.data
+        response = mock.sentinel.response
+        mock_get_response.return_value = response
+        mock_get_error.return_value = None
+
+        result = base_parser.parse(data)
+
+        mock_get_response.assert_called_once_with(data)
+        mock_get_error.assert_called_once_with(response)
+        mock_resolve_exception.assert_not_called()
+        assert result == response
+
+
+class TestBaseParserGetResponse(object):
+
     def test_raises_not_implemented(self, base_parser):
         data = mock.sentinel.data
 
         with pytest.raises(NotImplementedError):
-            base_parser.parse(data)
+            base_parser._get_response(data)
+
+
+class TestBaseParserGetError(object):
+
+    def test_raises_not_implemented(self, base_parser):
+        data = mock.sentinel.data
+
+        with pytest.raises(NotImplementedError):
+            base_parser._get_error(data)

@@ -4,8 +4,7 @@ try:
 except ImportError:
     import json
 
-from wykop.api.exceptions import WykopAPIError
-from wykop.api.parsers.base import BaseParser
+from wykop.api.parsers.base import BaseParser, Error
 
 
 class JSONParser(BaseParser):
@@ -14,13 +13,19 @@ class JSONParser(BaseParser):
         super(JSONParser, self).__init__(exception_resolver)
         self.json_kwargs = json_kwargs
 
-    def parse(self, data):
-        result = json.loads(data, **self.json_kwargs)
+    def _get_response(self, data):
+        return json.loads(data, **self.json_kwargs)
 
-        error = result.get('error')
-        if error:
-            code = error.get('code')
-            message = error.get('message')
-            raise self._resolve_exception(code, message, WykopAPIError)
+    def _get_error(self, response):
+        if not isinstance(response, dict):
+            return
 
-        return result
+        error_data = response.get('error')
+
+        if error_data is None:
+            return
+
+        code = error_data.get('code')
+        message = error_data.get('message')
+
+        return Error(code, message)

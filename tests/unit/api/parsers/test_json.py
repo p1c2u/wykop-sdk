@@ -1,7 +1,6 @@
 import mock
-import pytest
 
-from wykop.api.exceptions import WykopAPIError
+from wykop.api.parsers.base import Error
 from wykop.api.parsers.json import JSONParser
 
 
@@ -21,42 +20,48 @@ class TestJSONParserInit(object):
         assert parser.json_kwargs == json_params
 
 
-class TestJSONParserParse(object):
+class TestJSONParserGetResponse(object):
 
-    @mock.patch.object(JSONParser, '_resolve_exception')
-    @mock.patch('json.loads')
-    def test_error(self, mocked_loads, mocked_resolve_exception, json_parser):
+    @mock.patch('wykop.api.parsers.json.json.loads')
+    def test_response(self, mock_loads, json_parser):
         data = mock.sentinel.data
-        code = 1
-        message = 'error message'
+        response = mock.sentinel.response
+        mock_loads.return_value = response
+
+        result = json_parser._get_response(data)
+
+        mock_loads.assert_called_once_with(data, **json_parser.json_kwargs)
+        assert result == response
+
+
+class TestJSONParserGetError(object):
+
+    def test_not_dict(self, json_parser):
+        response = []
+
+        result = json_parser._get_error(response)
+
+        assert result is None
+
+    def test_no_error(self, json_parser):
+        response = {
+            'data': 'data',
+        }
+
+        result = json_parser._get_error(response)
+
+        assert result is None
+
+    def test_error(self, json_parser):
+        code = mock.sentinel.code
+        message = mock.sentinel.message
         response = {
             'error': {
                 'code': code,
                 'message': message,
             }
         }
-        mocked_loads.return_value = response
-        mocked_resolve_exception.side_effect = Exception()
 
-        with pytest.raises(Exception):
-            json_parser.parse(data)
+        result = json_parser._get_error(response)
 
-        mocked_loads.assert_called_once_with(data, **json_parser.json_kwargs)
-        mocked_resolve_exception.assert_called_once_with(
-            code, message, WykopAPIError)
-
-    @mock.patch.object(JSONParser, '_resolve_exception')
-    @mock.patch('json.loads')
-    def test_no_error(
-            self, mocked_loads, mocked_resolve_exception, json_parser):
-        data = mock.sentinel.data
-        response = {
-            'data': 'data'
-        }
-        mocked_loads.return_value = response
-
-        result = json_parser.parse(data)
-
-        mocked_loads.assert_called_once_with(data, **json_parser.json_kwargs)
-        mocked_resolve_exception.assert_not_called()
-        assert result == response
+        assert result == Error(code, message)
