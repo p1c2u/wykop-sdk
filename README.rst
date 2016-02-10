@@ -10,6 +10,9 @@
 .. image:: https://travis-ci.org/p1c2u/wykop-sdk.svg?branch=master
     :target: https://travis-ci.org/p1c2u/wykop-sdk
 
+.. image:: https://img.shields.io/codecov/c/github/p1c2u/wykop-sdk/master.svg?style=flat
+    :target: https://codecov.io/github/p1c2u/wykop-sdk?branch=master
+
 Biblioteka ta jest implementacją `Wykop API`_ w Python.
 
 .. _Wykop API: http://www.wykop.pl/developers/api/
