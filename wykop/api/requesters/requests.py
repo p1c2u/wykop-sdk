@@ -25,8 +25,9 @@ class RequestsRequester(BaseRequester):
         try:
             files = self._get_files(files)
             method = self._get_method(data, files)
-            req = request(method, url, data=data, headers=headers, files=files)
-            return force_text(req.content)
+            resp = request(method, url, data=data, headers=headers, files=files)
+            resp.raise_for_status()
+            return force_text(resp.content)
         except RequestException as e:
             raise WykopAPIError(0, str(e))
 
