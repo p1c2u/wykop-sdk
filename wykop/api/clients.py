@@ -2,11 +2,12 @@ import base64
 import hashlib
 import logging
 from datetime import date, timedelta
+from itertools import cycle
 
 from six.moves.urllib.parse import urlunparse, quote_plus
 
 from wykop.api.decorators import login_required
-from wykop.api.exceptions import WykopAPIError
+from wykop.api.exceptions import WykopAPIError, DailtyRequestLimitError
 from wykop.api.parsers import default_parser
 from wykop.api.requesters import default_requester
 from wykop.utils import (
@@ -39,6 +40,28 @@ class BaseWykopAPI(object):
         self.output = output
         self.format = response_format
         self.userkey = ''
+
+    def __getstate__(self):
+        return {
+            'appkey': self.appkey,
+            'secretkey': self.secretkey,
+            'login': self.login,
+            'accountkey': self.accountkey,
+            'password': self.password,
+            'output': self.output,
+            'format': self.format,
+            'userkey': self.userkey,
+        }
+
+    def __setstate__(self, state):
+        self.appkey = state['appkey']
+        self.secretkey = state['secretkey']
+        self.login = state['login']
+        self.accountkey = state['accountkey']
+        self.password = state['password']
+        self.output = state['output']
+        self.format = state['format']
+        self.userkey = state['userkey']
 
     def get_method_params(self, *method_params):
         """
@@ -667,3 +690,35 @@ class WykopAPI(BaseWykopAPI):
     @login_required
     def delete_conversation(self, username):
         return self.request('pm', 'deleteconversation', [username])
+
+
+class RotatingKeysWykopAPI(WykopAPI):
+    """
+    Rotating Keys Wykop API class
+    """
+
+    def __init__(self, key_pairs=[(None, None)], **kwargs):
+        self.keys_iter = self._create_keys_iterator(*key_pairs)
+        keys = next(self.keys_iter)
+
+        super(RotatingKeysWykopAPI, self).__init__(*keys, **kwargs)
+
+    def __getstate__(self):
+        state = super(RotatingKeysWykopAPI, self).__getstate__()
+        state['keys_iter'] = self.keys_iter
+        return state
+
+    def __setstate__(self, state):
+        super(RotatingKeysWykopAPI, self).__setstate__(state)
+        self.keys_iter = state['keys_iter']
+
+    def _create_keys_iterator(seld, *key_pairs):
+        return cycle(key_pairs)
+
+    def request(self, *args, **kwargs):
+        try:
+            return super(RotatingKeysWykopAPI, self).request(*args, **kwargs)
+        except DailtyRequestLimitError:
+            log.debug("Using next key pair")
+            self.appkey, self.secretkey = next(self.keys_iter)
+            return self.request(*args, **kwargs)

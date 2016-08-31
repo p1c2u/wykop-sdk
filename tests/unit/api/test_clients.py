@@ -1,9 +1,11 @@
 import mock
+import pickle
 import pytest
 
 import json
 
 from wykop.api.clients import BaseWykopAPI, WykopAPI
+from wykop.api.exceptions import DailtyRequestLimitError
 from wykop.api.parsers import JSONParser
 from wykop.api.requesters import Requester
 
@@ -521,3 +523,67 @@ class TestBaseWykopAPIRequest(object):
         mocked_make_request.assert_called_once_with(url, data, headers, files)
         mocked_parse.assert_not_called()
         assert result == response
+
+
+class TestRotatingKeysWykopAPIRequest(object):
+
+    @mock.patch.object(WykopAPI, 'request')
+    def test_no_rotate_keys(self, mocked_request, rotating_keys_wykop_api):
+        request_type = mock.sentinel.request_type
+        request_method = mock.sentinel.request_method
+        response = mock.sentinel.response
+        mocked_request.return_value = response
+        first_appkey = rotating_keys_wykop_api.appkey
+        first_secretkey = rotating_keys_wykop_api.secretkey
+
+        result = rotating_keys_wykop_api.request(request_type, request_method)
+
+        mocked_request.assert_called_once_with(request_type, request_method)
+        assert result == response
+        assert rotating_keys_wykop_api.appkey == first_appkey
+        assert rotating_keys_wykop_api.secretkey == first_secretkey
+
+    @mock.patch.object(WykopAPI, 'request')
+    def test_rotate_keys(self, mocked_request, rotating_keys_wykop_api):
+        request_type = mock.sentinel.request_type
+        request_method = mock.sentinel.request_method
+        response = mock.sentinel.response
+        mocked_request.side_effect = [
+            DailtyRequestLimitError(),
+            response,
+        ]
+        first_appkey = rotating_keys_wykop_api.appkey
+        first_secretkey = rotating_keys_wykop_api.secretkey
+
+        result = rotating_keys_wykop_api.request(request_type, request_method)
+
+        calls = [
+            mock.call(request_type, request_method),
+        ]
+        mocked_request.assert_has_calls(calls)
+        assert result == response
+        assert not rotating_keys_wykop_api.appkey == first_appkey
+        assert not rotating_keys_wykop_api.secretkey == first_secretkey
+
+    @mock.patch.object(WykopAPI, 'request')
+    def test_rotate_keys_repeat(self, mocked_request, rotating_keys_wykop_api):
+        request_type = mock.sentinel.request_type
+        request_method = mock.sentinel.request_method
+        response = mock.sentinel.response
+        mocked_request.side_effect = [
+            DailtyRequestLimitError(),
+            DailtyRequestLimitError(),
+            response,
+        ]
+        first_appkey = rotating_keys_wykop_api.appkey
+        first_secretkey = rotating_keys_wykop_api.secretkey
+
+        result = rotating_keys_wykop_api.request(request_type, request_method)
+
+        calls = [
+            mock.call(request_type, request_method),
+        ]
+        mocked_request.assert_has_calls(calls)
+        assert result == response
+        assert rotating_keys_wykop_api.appkey == first_appkey
+        assert rotating_keys_wykop_api.secretkey == first_secretkey
