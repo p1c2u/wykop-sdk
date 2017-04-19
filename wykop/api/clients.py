@@ -582,7 +582,7 @@ class WykopAPI(BaseWykopAPI):
         return self.request('entries', 'delete', [entry_id])
 
     @login_required
-    def add_entry_comment(self, entry_id, body, embed):
+    def add_entry_comment(self, entry_id, body, embed=None):
         post_params = {'body': body}
 
         if embed:
