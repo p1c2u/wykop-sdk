@@ -27,7 +27,7 @@ class BaseWykopAPI(object):
     """
 
     _client_name = 'wykop-sdk'
-    _protocol = 'http'
+    _protocol = 'https'
     _domain = 'a.wykop.pl'
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
