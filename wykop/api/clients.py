@@ -150,13 +150,18 @@ class BaseWykopAPI(object):
             'User-Agent': user_agent,
         }
 
-    def request(self, rtype, rmethod, rmethod_params=[],
-                api_params={}, post_params={}, file_params={},
+    def request(self, rtype, rmethod, rmethod_params=None,
+                api_params=None, post_params=None, file_params=None,
                 parser=default_parser, requester=default_requester):
         """
         Makes request.
         """
         log.debug('Making request')
+
+        rmethod_params = rmethod_params or []
+        api_params = api_params or {}
+        post_params = post_params or {}
+        file_params = file_params or {}
 
         # sanitize data
         rtype = force_text(rtype)
@@ -508,8 +513,8 @@ class WykopAPI(BaseWykopAPI):
                             api_params=api_params,
                             post_params=post_params)
 
-    def search_profiles(self, q):
-        post_params = {'q': q}
+    def search_profiles(self, query):
+        post_params = {'q': query}
         return self.request('search', 'entries',
                             post_params=post_params)
 
