@@ -19,8 +19,10 @@ class UrllibRequester(BaseRequester):
     """
 
     def make_request(self, url, data=None, headers=None, files=None):
-        log.debug(" Fetching url: `%s` (data: %s, headers: `%s`)" %
-                  (str(url), str(data), str(headers)))
+        log.debug(
+            " Fetching url: `%s` (data: %s, headers: `%s`)",
+            str(url), str(data), str(headers),
+        )
 
         if files:
             raise NotImplementedError(
@@ -33,8 +35,8 @@ class UrllibRequester(BaseRequester):
         req = Request(url, data=data_bytes, headers=headers)
 
         try:
-            with contextlib.closing(urlopen(req)) as f:
-                return force_text(f.read())
+            with contextlib.closing(urlopen(req)) as resp:
+                return force_text(resp.read())
         except HTTPError as ex:
             raise WykopAPIError(0, str(ex.code))
         except URLError as ex:

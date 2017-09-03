@@ -21,8 +21,10 @@ class RequestsRequester(BaseRequester):
     METHOD_POST = 'POST'
 
     def make_request(self, url, data=None, headers=None, files=None):
-        log.debug(" Fetching url: `%s` (data: %s, headers: `%s`)" %
-                  (str(url), str(data), str(headers)))
+        log.debug(
+            " Fetching url: `%s` (data: %s, headers: `%s`)",
+            str(url), str(data), str(headers),
+        )
         try:
             files = self._get_files(files)
             method = self._get_method(data, files)
