@@ -1,3 +1,4 @@
+"""Wykop utils module."""
 import mimetypes
 from pkg_resources import get_distribution, DistributionNotFound
 

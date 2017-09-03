@@ -1,9 +1,11 @@
+"""Wykop API exceptions resolver module."""
 import sys
 
 from wykop.utils import force_bytes
 
 
 class ExceptionResolver(object):
+    """Wykop API exception resolver."""
 
     def __init__(self, exceptions):
         self.exceptions = exceptions

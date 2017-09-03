@@ -1,3 +1,4 @@
+"""Wykop API base exceptions module."""
 __all__ = [
     'InvalidAPIKeyError', 'InvalidParamsError', 'NotEnoughParamsError',
     'AppWritePermissionsError', 'DailtyRequestLimitError',
@@ -13,9 +14,7 @@ __all__ = [
 
 
 class WykopAPIError(Exception):
-    """
-    Base Wykop API exception class
-    """
+    """Base Wykop API exception."""
     pass
 
 class InvalidAPIKeyError(WykopAPIError):

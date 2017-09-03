@@ -1,3 +1,4 @@
+"""Wykop API clients module."""
 import base64
 import hashlib
 import logging
@@ -23,7 +24,7 @@ log = logging.getLogger(__name__)
 
 class BaseWykopAPI(object):
     """
-    Base Wykop API class
+    Base Wykop API.
     """
 
     _client_name = 'wykop-sdk'
@@ -149,13 +150,18 @@ class BaseWykopAPI(object):
             'User-Agent': user_agent,
         }
 
-    def request(self, rtype, rmethod, rmethod_params=[],
-                api_params={}, post_params={}, file_params={},
+    def request(self, rtype, rmethod, rmethod_params=None,
+                api_params=None, post_params=None, file_params=None,
                 parser=default_parser, requester=default_requester):
         """
         Makes request.
         """
         log.debug('Making request')
+
+        rmethod_params = rmethod_params or []
+        api_params = api_params or {}
+        post_params = post_params or {}
+        file_params = file_params or {}
 
         # sanitize data
         rtype = force_text(rtype)
@@ -177,7 +183,7 @@ class BaseWykopAPI(object):
 
 class WykopAPI(BaseWykopAPI):
     """
-    Wykop API class
+    Wykop API version 1.
     """
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
@@ -507,8 +513,8 @@ class WykopAPI(BaseWykopAPI):
                             api_params=api_params,
                             post_params=post_params)
 
-    def search_profiles(self, q):
-        post_params = {'q': q}
+    def search_profiles(self, query):
+        post_params = {'q': query}
         return self.request('search', 'entries',
                             post_params=post_params)
 
@@ -574,7 +580,7 @@ class WykopAPI(BaseWykopAPI):
     @login_required
     def edit_entry(self, entry_id, body):
         post_params = {'body': body}
-        return self.request('entries', 'edit',
+        return self.request('entries', 'edit', [entry_id],
                             post_params=post_params)
 
     @login_required
