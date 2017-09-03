@@ -5,5 +5,5 @@ from wykop.api.models import WykopAPIResponse
 
 default_parser = JSONParser(
     default_exception_resolver,
-    object_hook=lambda obj: WykopAPIResponse(obj),
+    object_hook=WykopAPIResponse,
 )
