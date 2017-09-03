@@ -1,3 +1,4 @@
+"""Wykop API decorators module."""
 from wykop.api.exceptions import InvalidUserKeyError
 
 

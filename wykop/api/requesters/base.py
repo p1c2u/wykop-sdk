@@ -1,4 +1,6 @@
+"""Wykop API base requester module."""
 class BaseRequester(object):
+    """Base Wykop API reqeuster"""
 
     def make_request(self, url, data=None, headers=None, files=None):
         raise NotImplementedError(

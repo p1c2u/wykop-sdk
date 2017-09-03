@@ -1,3 +1,4 @@
+"""wykop API urllib requester module."""
 import contextlib
 import logging
 
@@ -14,7 +15,7 @@ log = logging.getLogger(__name__)
 
 class UrllibRequester(BaseRequester):
     """
-    Urllib requester class
+    Urllib Wykop API requester. Uses urllib module.
     """
 
     def make_request(self, url, data=None, headers=None, files=None):
@@ -34,7 +35,7 @@ class UrllibRequester(BaseRequester):
         try:
             with contextlib.closing(urlopen(req)) as f:
                 return force_text(f.read())
-        except HTTPError as e:
-            raise WykopAPIError(0, str(e.code))
-        except URLError as e:
-            raise WykopAPIError(0, str(e.reason))
+        except HTTPError as ex:
+            raise WykopAPIError(0, str(ex.code))
+        except URLError as ex:
+            raise WykopAPIError(0, str(ex.reason))

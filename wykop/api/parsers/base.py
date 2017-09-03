@@ -1,3 +1,4 @@
+"""Wykop API base praser module."""
 from collections import namedtuple
 
 from wykop.api.exceptions import WykopAPIError

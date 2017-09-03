@@ -1,3 +1,4 @@
+"""Wykop API clients module."""
 import base64
 import hashlib
 import logging
@@ -23,7 +24,7 @@ log = logging.getLogger(__name__)
 
 class BaseWykopAPI(object):
     """
-    Base Wykop API class
+    Base Wykop API.
     """
 
     _client_name = 'wykop-sdk'
@@ -177,7 +178,7 @@ class BaseWykopAPI(object):
 
 class WykopAPI(BaseWykopAPI):
     """
-    Wykop API class
+    Wykop API version 1.
     """
 
     def __init__(self, appkey, secretkey, login=None, accountkey=None,
