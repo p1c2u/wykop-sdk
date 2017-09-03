@@ -580,7 +580,7 @@ class WykopAPI(BaseWykopAPI):
     @login_required
     def edit_entry(self, entry_id, body):
         post_params = {'body': body}
-        return self.request('entries', 'edit',
+        return self.request('entries', 'edit', [entry_id],
                             post_params=post_params)
 
     @login_required
