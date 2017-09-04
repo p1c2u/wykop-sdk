@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 from six.moves.urllib.parse import urlunparse
 
@@ -83,14 +84,18 @@ class BaseWykopAPIv2(BaseWykopAPI):
         Gets request method parameters.
         """
         default_params = self.get_default_api_params()
-
-        for params in [api_params, default_params]:
-            # map all params to string
-            for key, value in params.items():
-                if not value:
-                    continue
-                yield str(key)
-                yield str(value)
+        # sort
+        params = OrderedDict(api_params)
+        params.update([
+            (k, default_params[k])
+            for k in sorted(default_params, key=default_params.get)
+        ])
+        # map all params to string
+        for key, value in params.items():
+            if not value:
+                continue
+            yield str(key)
+            yield str(value)
 
 
 class WykopAPIv2(BaseWykopAPIv2):
