@@ -56,8 +56,11 @@ Przykładowe użycie metody wymagającej uwierzytelnienia:
     api.authenticate(login, klucz_polaczenia)
     profile = api.observe_profile("m__b")
 
-Zdefiniowane metody
+API wersja 1
 -------------------
+
+Zdefiniowane metody
+^^^^^^^^^^^^^^^^^^^
 
 Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 
@@ -247,7 +250,7 @@ Biblioteka posiada wbudowane metody odpowiednie do zdefiniowanych w Wykop API
 
 
 Proste żądania
------------------
+^^^^^^^^^^^^^^^^^^^
 
 Można również skorzystać z podstawowej metody do tworzenia żądań. Przykład z dokumentacji Wykop API będzie przedstawiał się następująco:
 
@@ -268,7 +271,7 @@ gdzie:
 +-------------------+-------------------------+
 
 Wykop Connect
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Możliwe jest też łączenie konta użytkownika z aplikacją
 
@@ -285,7 +288,7 @@ Dekodowanie danych Wykop Connect
     appkey, login, token = api.get_connect_data(encoded_data)
 
 Odpowiedzi
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 Wyróżniamy 3 typy odpowiedzi:
 
@@ -318,7 +321,7 @@ Każdy obiekt z odpowiedzi jest typu słownikowego (dict) z możliwością dost�
     12155
 
 Filtrowanie odpowiedzi
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 Aby odfiltrować z odpowiedzi kod HTML, należy wywołać klasę z parametrem output='clear'
 
 ::
@@ -329,6 +332,128 @@ Aby odfiltrować z odpowiedzi kod HTML, należy wywołać klasę z parametrem ou
     api.authenticate(login, klucz_polaczenia)
     profile = api.observe_profile("m__b")
 
+API wersja 2
+-------------------
+
+Wykop posiada API w wersji 2. Jest to nowa, nieudokumentowana wersja API. Implementacja tej wersji w SDK może się zmieniać.
+
+.. warning::
+
+   Uwierzytelnienie działa tylko z kluczami ze wsparciem dla tej wersji API.
+
+Zdefiniowane metody
+^^^^^^^^^^^^^^^^^^^
+
+API w wersji 2 posiada następujące wbudowane metody.
+
++-------------------+--------------------------------+
+| Metoda API        | Metoda SDK                     |
++-------------------+--------------------------------+
+| **Links**                                          |
++-------------------+--------------------------------+
+| ?                 | get_links_promoted             |
++-------------------+--------------------------------+
+| ?                 | get_links_upcoming             |
++-------------------+--------------------------------+
+| ?                 | get_link_comments              |
++-------------------+--------------------------------+
+| ?                 | get_link_related               |
++-------------------+--------------------------------+
+| ?                 | get_link_upvoters              |
++-------------------+--------------------------------+
+| ?                 | get_link_downvoters            |
++-------------------+--------------------------------+
+| **MyWykop**                                        |
++-------------------+--------------------------------+
+| ?                 | get_mywykop                    |
++-------------------+--------------------------------+
+| ?                 | get_mywykop_tags               |
++-------------------+--------------------------------+
+| ?                 | get_mywykop_users              |
++-------------------+--------------------------------+
+| **Notifications**                                  |
++-------------------+--------------------------------+
+| ?                 | get_notifications              |
++-------------------+--------------------------------+
+| ?                 | get_notifications_count        |
++-------------------+--------------------------------+
+| ?                 | get_hashtags_notifications     |
++-------------------+--------------------------------+
+| ?                 | get_hashtags_notifications_cou |
++-------------------+--------------------------------+
+| **Profiles**                                       |
++-------------------+--------------------------------+
+| ?                 | get_profile                    |
++-------------------+--------------------------------+
+| ?                 | observe_profile                |
++-------------------+--------------------------------+
+| ?                 | unobserve_profile              |
++-------------------+--------------------------------+
+| ?                 | block_profile                  |
++-------------------+--------------------------------+
+| ?                 | unblock_profile                |
++-------------------+--------------------------------+
+| **Search**                                         |
++-------------------+--------------------------------+
+| ?                 | search_links                   |
++-------------------+--------------------------------+
+| ?                 | search_entries                 |
++-------------------+--------------------------------+
+| ?                 | search_profiles                |
++-------------------+--------------------------------+
+| **Login**                                          |
++-------------------+--------------------------------+
+| ?                 | user_login                     |
++-------------------+--------------------------------+
+| **Hits**                                           |
++-------------------+--------------------------------+
+| ?                 | get_hits_month                 |
++-------------------+--------------------------------+
+| ?                 | get_hits_popular               |
++-------------------+--------------------------------+
+| **Entries**                                        |
++-------------------+--------------------------------+
+| ?                 | get_entry                      |
++-------------------+--------------------------------+
+| ?                 | get_stream_entries             |
++-------------------+--------------------------------+
+| ?                 | get_hot_entries                |
++-------------------+--------------------------------+
+| **Tag**                                            |
++-------------------+--------------------------------+
+| ?                 | get_tag                        |
++-------------------+--------------------------------+
+| ?                 | get_tags_observed              |
++-------------------+--------------------------------+
+| ?                 | get_tag_entries                |
++-------------------+--------------------------------+
+| ?                 | get_tag_links                  |
++-------------------+--------------------------------+
+| **PM**                                             |
++-------------------+--------------------------------+
+| ?                 | get_conversations_list         |
++-------------------+--------------------------------+
+
+? = nieudokumentowana metoda
+
+Proste żądania
+^^^^^^^^^^^^^^^^^^^
+
+Implementacja API w wersji 2 również posiada podstawową metodę do tworzenia żądań. Na przykład:
+
+::
+
+    link = api.request("entries", 'hot', {"period": 12})
+
+gdzie:
+
++-------------------+-------------------------+
+| 'entries'         | typ zasobu              |
++-------------------+-------------------------+
+| 'hot'             | metoda zasobu           |
++-------------------+-------------------------+
+| {"period": 12}    | parametry API           |
++-------------------+-------------------------+
 
 Zgłaszanie błędów
 -----------------

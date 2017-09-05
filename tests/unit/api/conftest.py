@@ -5,7 +5,8 @@ except ImportError:
     import mock
 
 
-from wykop.api.clients import BaseWykopAPI, WykopAPI, RotatingKeysWykopAPI
+from wykop.api.clients import BaseWykopAPI
+from wykop.api.v1.clients import WykopAPIv1, RotatingKeysWykopAPI
 from wykop.api.exceptions.resolvers import ExceptionResolver
 
 
@@ -32,7 +33,7 @@ def base_wykop_api():
 
 @pytest.fixture
 def wykop_api():
-    return WykopAPI(
+    return WykopAPIv1(
         mock.sentinel.appkey,
         mock.sentinel.secretkey,
         output=mock.sentinel.output,

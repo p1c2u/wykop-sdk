@@ -65,3 +65,17 @@ class TestJSONParserGetError(object):
         result = json_parser._get_error(response)
 
         assert result == Error(code, message)
+
+    def test_error_en(self, json_parser):
+        code = mock.sentinel.code
+        message = mock.sentinel.message
+        response = {
+            'error': {
+                'code': code,
+                'message_en': message,
+            }
+        }
+
+        result = json_parser._get_error(response)
+
+        assert result == Error(code, message)

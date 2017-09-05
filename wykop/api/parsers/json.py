@@ -29,4 +29,8 @@ class JSONParser(BaseParser):
         code = error_data.get('code')
         message = error_data.get('message')
 
+        if message is None:
+            # try english message
+            message = error_data.get('message_en')
+
         return Error(code, message)

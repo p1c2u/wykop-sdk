@@ -1,6 +1,7 @@
 import pytest
 
-from wykop.api.clients import BaseWykopAPI
+from wykop.api.v1.clients import WykopAPIv1
+from wykop.api.v2.clients import WykopAPIv2
 from wykop.api.requesters.requests import RequestsRequester
 from wykop.api.requesters.urllib import UrllibRequester
 
@@ -16,9 +17,18 @@ def urllib_requester():
 
 
 @pytest.fixture
-def base_wykop_api():
+def wykop_api_v1():
     appkey = '123456app'
     secretkey = '654321secret'
-    api = BaseWykopAPI(appkey, secretkey)
+    api = WykopAPIv1(appkey, secretkey)
+    api._domain = 'api.test.com'
+    return api
+
+
+@pytest.fixture
+def wykop_api_v2():
+    appkey = '123456app'
+    secretkey = '654321secret'
+    api = WykopAPIv2(appkey, secretkey)
     api._domain = 'api.test.com'
     return api

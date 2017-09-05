@@ -1,7 +1,7 @@
 from itertools import chain, cycle
 import mock
 
-from wykop.api.clients import WykopAPI
+from wykop.api.v1.clients import WykopAPIv1 as WykopAPI
 from wykop.api.decorators import login_required
 from wykop.api.exceptions import InvalidUserKeyError
 

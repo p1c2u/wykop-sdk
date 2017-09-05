@@ -49,6 +49,10 @@ class SessionAppPermissionError(WykopAPIError):
     pass
 
 
+class NotSupportedAPIKeyError(WykopAPIError):
+    pass
+
+
 class InvalidUserKeyError(WykopAPIError):
     pass
 
@@ -141,6 +145,7 @@ __all_exceptions__ = {
     6:      InvalidAPISignError,
     7:      AppPermissionsError,
     8:      SessionAppPermissionError,
+    9:      NotSupportedAPIKeyError,
     11:     InvalidUserKeyError,
     12:     InvalidSessionKeyError,
     13:     UserDoesNotExistError,
