@@ -6,6 +6,7 @@
 # Packages
 *.egg
 *.egg-info
+.cache
 dist
 build
 eggs
@@ -25,6 +26,7 @@ pip-log.txt
 .coverage
 .tox
 nosetests.xml
+htmlcov
 
 # Translations
 *.mo
