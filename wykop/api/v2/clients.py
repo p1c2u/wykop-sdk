@@ -58,7 +58,7 @@ class BaseWykopAPIv2(BaseWykopAPI):
         """
         Constructs request url.
         """
-        path = self.get_path(rtype, rmethod, **api_params)
+        path = self.get_path(rtype, rmethod=rmethod, **api_params)
 
         urlparts = (self._protocol, self._domain, path, '', '', '')
         return str(urlunparse(urlparts))
