@@ -341,6 +341,15 @@ Wykop posiada API w wersji 2. Jest to nowa, nieudokumentowana wersja API. Implem
 
    Uwierzytelnienie działa tylko z kluczami ze wsparciem dla tej wersji API.
 
+Przykładowe użycie:
+
+::
+
+    from wykop import WykopAPIv2
+
+    api = WykopAPIv2(klucz_aplikacji, sekret_aplikacji)
+    profile = api.get_profile("m__b")
+
 Zdefiniowane metody
 ^^^^^^^^^^^^^^^^^^^
 
