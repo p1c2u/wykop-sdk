@@ -1,5 +1,8 @@
+import base64
+import json
 from types import GeneratorType
 import mock
+import pytest
 
 from wykop.api.v2.clients import WykopAPIv2
 
@@ -35,10 +38,10 @@ class TestWykopAPIv2GetApiParams(object):
 
         assert type(result) == GeneratorType
         assert tuple(result) == (
-            'test1', '1',
             'appkey', 'sentinel.appkey',
             'format', 'sentinel.format',
             'output', 'sentinel.output',
+            'test1', '1',
         )
 
 
@@ -140,3 +143,72 @@ class TestWykopAPIv2ConstructUrl(object):
             wykop_api_v2._domain,
             path,
         )
+
+
+class TestWykopAPIv2GetConnectUrl(object):
+
+    def test_no_redirect(self, wykop_api_v2):
+        result = wykop_api_v2.get_connect_url()
+
+        assert result == (
+            '{0}://{1}/login/connect/appkey/sentinel.appkey/'
+            'format/sentinel.format/output/sentinel.output/'
+            'secure/fac51ab497520eb2d672129c5b69dc72'
+        ).format(
+            wykop_api_v2._protocol,
+            wykop_api_v2._domain,
+        )
+
+    def test_empty_redirect(self, wykop_api_v2):
+        redirect_url = ''
+
+        result = wykop_api_v2.get_connect_url(redirect_url)
+
+        assert result == (
+            '{0}://{1}/login/connect/appkey/sentinel.appkey/'
+            'format/sentinel.format/output/sentinel.output/'
+            'secure/7442ad1ab40db3ae567690b838c6879d'
+        ).format(
+            wykop_api_v2._protocol,
+            wykop_api_v2._domain,
+        )
+
+    def test_with_redirect(self, wykop_api_v2):
+        redirect_url = 'test.com'
+
+        result = wykop_api_v2.get_connect_url(redirect_url)
+
+        assert result == (
+            '{0}://{1}/login/connect/appkey/sentinel.appkey/'
+            'format/sentinel.format/output/sentinel.output/'
+            'redirect/dGVzdC5jb20%3D/secure/56915610d9335cb4300b1d8b937f9495'
+        ).format(
+            wykop_api_v2._protocol,
+            wykop_api_v2._domain,
+        )
+
+
+class TestWykopAPIGetConnectData(object):
+
+    @pytest.fixture
+    def connect_data_factory(self):
+        def get_connect_data(appkey, login, token):
+            data = {
+                'appkey': appkey,
+                'login': login,
+                'token': token,
+            }
+            data_str = json.dumps(data)
+            data_bytes = data_str.encode()
+            return base64.encodestring(data_bytes)
+        return get_connect_data
+
+    def test_decoded(self, wykop_api_v2, connect_data_factory):
+        appkey = 'appkey'
+        login = 'login'
+        token = 'token'
+        data_bytes_encoded = connect_data_factory(appkey, login, token)
+
+        result = wykop_api_v2.get_connect_data(data_bytes_encoded)
+
+        assert result == (appkey, login, token)

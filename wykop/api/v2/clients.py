@@ -1,7 +1,8 @@
+import base64
 import logging
 from collections import OrderedDict
 
-from six.moves.urllib.parse import urlunparse
+from six.moves.urllib.parse import urlunparse, quote_plus
 
 from wykop.api.clients import BaseWykopAPI
 from wykop.api.decorators import login_required
@@ -83,15 +84,12 @@ class BaseWykopAPIv2(BaseWykopAPI):
         """
         Gets request method parameters.
         """
-        default_params = self.get_default_api_params()
+        params = self.get_default_api_params()
+        params.update(api_params)
         # sort
-        params = OrderedDict(api_params)
-        params.update([
-            (k, default_params[k])
-            for k in sorted(default_params, key=default_params.get)
-        ])
+        params_ordered = OrderedDict(sorted(params.items()))
         # map all params to string
-        for key, value in params.items():
+        for key, value in params_ordered.items():
             if not value:
                 continue
             yield str(key)
@@ -126,6 +124,16 @@ class WykopAPIv2(BaseWykopAPIv2):
             post_params['password'] = password
 
         return self.request('login', post_params=post_params)
+
+    # Connect
+
+    def get_connect_url(self, redirect_url=None):
+        """
+        Gets url for wykop connect.
+        """
+        api_params = self.get_connect_api_params(redirect_url)
+
+        return self.construct_url('login', 'connect', **api_params)
 
     # entries
 

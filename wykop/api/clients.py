@@ -110,3 +110,33 @@ class BaseWykopAPI(object):
             'apisign': apisign,
             'User-Agent': user_agent,
         }
+
+    def get_connect_api_params(self, redirect_url=None):
+        """
+        Gets request api parameters for wykop connect.
+        """
+        apisign = self.get_api_sign(redirect_url)
+
+        api_params = {
+            'secure': apisign,
+        }
+
+        if redirect_url is not None:
+            redirect_url_bytes = force_bytes(redirect_url)
+            redirect_url_encoded = quote_plus(
+                base64.b64encode(redirect_url_bytes))
+            api_params.update({
+                'redirect': redirect_url_encoded,
+            })
+
+        return api_params
+
+    def get_connect_data(self, data, parser=default_parser):
+        """
+        Gets decoded data from wykop connect.
+        """
+        data_bytes = force_bytes(data)
+        decoded = base64.decodestring(data_bytes)
+        decoded_str = force_text(decoded)
+        parsed = parser.parse(decoded_str)
+        return parsed['appkey'], parsed['login'], parsed['token']
