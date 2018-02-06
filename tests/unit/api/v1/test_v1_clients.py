@@ -1,3 +1,5 @@
+import base64
+import json
 import mock
 import pytest
 
@@ -390,6 +392,63 @@ class TestWykopAPIRequest(object):
         mocked_make_request.assert_called_once_with(url, data, headers, files)
         mocked_parse.assert_not_called()
         assert result == response
+
+
+class TestWykopAPIGetConnectUrl(object):
+
+    def test_empty_redirect(self, wykop_api):
+        redirect_url = ''
+
+        result = wykop_api.get_connect_url(redirect_url)
+
+        assert result == (
+            '{0}://{1}/user/connect/appkey,sentinel.appkey,format,sentinel.'
+            'format,output,sentinel.output,redirect,,secure,'
+            '7442ad1ab40db3ae567690b838c6879d,userkey,'
+        ).format(
+            wykop_api._protocol,
+            wykop_api._domain,
+        )
+
+    def test_with_redirect(self, wykop_api):
+        redirect_url = 'test.com'
+
+        result = wykop_api.get_connect_url(redirect_url)
+
+        assert result == (
+            '{0}://{1}/user/connect/appkey,sentinel.appkey,format,sentinel.'
+            'format,output,sentinel.output,redirect,dGVzdC5jb20%3D,secure,'
+            '56915610d9335cb4300b1d8b937f9495,userkey,'
+        ).format(
+            wykop_api._protocol,
+            wykop_api._domain,
+        )
+
+
+class TestWykopAPIGetConnectData(object):
+
+    @pytest.fixture
+    def connect_data_factory(self):
+        def get_connect_data(appkey, login, token):
+            data = {
+                'appkey': appkey,
+                'login': login,
+                'token': token,
+            }
+            data_str = json.dumps(data)
+            data_bytes = data_str.encode()
+            return base64.encodestring(data_bytes)
+        return get_connect_data
+
+    def test_decoded(self, wykop_api, connect_data_factory):
+        appkey = 'appkey'
+        login = 'login'
+        token = 'token'
+        data_bytes_encoded = connect_data_factory(appkey, login, token)
+
+        result = wykop_api.get_connect_data(data_bytes_encoded)
+
+        assert result == (appkey, login, token)
 
 
 class TestRotatingKeysWykopAPIRequest(object):

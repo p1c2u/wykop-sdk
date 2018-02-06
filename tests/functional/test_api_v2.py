@@ -85,7 +85,7 @@ class TestWykopAPIv2(object):
         }
         body = json.dumps(body_dict)
 
-        api_params = 'page/2/appkey/123456app/format/json'
+        api_params = 'appkey/123456app/format/json/page/2'
         url = '{protocol}://{domain}/{rtype}/{rmethod}/{api_params}'.format(
             protocol=wykop_api_v2._protocol,
             domain=wykop_api_v2._domain,

@@ -133,18 +133,6 @@ class WykopAPIv1(BaseWykopAPIv1):
 
     # Connect
 
-    def get_connect_api_params(self, redirect_url):
-        """
-        Gets request api parameters for wykop connect.
-        """
-        redirect_url_encoded = quote_plus(base64.b64encode(redirect_url))
-        apisign = self.get_api_sign(redirect_url)
-
-        return {
-            'redirect': redirect_url_encoded,
-            'secure': apisign,
-        }
-
     def get_connect_url(self, redirect_url):
         """
         Gets url for wykop connect.
@@ -152,14 +140,6 @@ class WykopAPIv1(BaseWykopAPIv1):
         api_params = self.get_connect_api_params(redirect_url)
 
         return self.construct_url('user', 'connect', **api_params)
-
-    def get_connect_data(self, data, parser=default_parser):
-        """
-        Gets decoded data from wykop connect.
-        """
-        decoded = base64.decodestring(data)
-        parsed = parser.parse(decoded)
-        return parsed['appkey'], parsed['login'], parsed['token']
 
     # Comments
 
