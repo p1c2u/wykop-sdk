@@ -125,6 +125,48 @@ class WykopAPIv2(BaseWykopAPIv2):
 
         return self.request('login', post_params=post_params)
 
+    # Addlink
+
+    @login_required
+    def add_link_draft(self, url):
+        """
+        Przygotowanie szkicu nowego znaleziska.
+
+        :param url: adres URL
+        :type url: str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def get_link_draft_images(self, key):
+        """
+        Pobranie obrazków szkicu nowego znaleziska.
+
+        :param key: klucz szkicu
+        :type key: str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def add_link(self, key, url, title, description, tags, plus18=False):
+        """
+        Dodanie nowego znaleziska.
+
+        :param key: klucz szkicu
+        :param url: adres URL
+        :param title: tytuł
+        :param description: opis
+        :param tags: tagi
+        :param plus18: oznaczenie +18
+        :type key: str
+        :type url: str
+        :type title: str
+        :type description: str
+        :type tags: str
+        :type plus18: bool
+        """
+        raise NotImplementedError
+
     # Connect
 
     def get_connect_url(self, redirect_url=None):
@@ -137,19 +179,27 @@ class WykopAPIv2(BaseWykopAPIv2):
 
     # entries
 
-    def get_entry(self, entry_id):
-        api_params = {
-            'entry': entry_id,
-        }
-        return self.request('entries', api_params=api_params)
-
-    def get_stream_entries(self, page=1):
+    def get_stream_entries(self, page=1, firstid=None):
+        """Pobranie listy wpisów.
+        
+        :param page: numer strony
+        :param firstid: id pierwszego wpisu na liście
+        :type page: int
+        :type firstid: int
+        """
         api_params = {
             'page': page,
         }
         return self.request('entries', 'stream', api_params=api_params)
 
     def get_hot_entries(self, period=12, page=1):
+        """Pobranie listy Gorących wpisów.
+        
+        :param period: okres w liczbie miesięcy (6, 12 lub 24)
+        :param page: numer strony
+        :type period: int
+        :type page: int
+        """
         assert period in [6, 12, 24]
         api_params = {
             'period': period,
@@ -157,15 +207,237 @@ class WykopAPIv2(BaseWykopAPIv2):
         }
         return self.request('entries', 'hot', api_params=api_params)
 
+    def get_active_entries(self, page=1):
+        """Pobranie listy Aktywnych wpisów.
+        
+        :param page: numer strony
+        :type page: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def get_observed_entries(self, page=1):
+        """Pobranie listy Obserwowanych wpisów.
+        
+        :param page: numer strony
+        :type page: int
+        """
+        raise NotImplementedError
+
+    def get_entry(self, entry_id):
+        """Pobranie pojedyńczego wpisu.
+        
+        :param entry_id: id wpisu
+        :type entry_id: int
+        """
+        api_params = {
+            'entry': entry_id,
+        }
+        return self.request('entries', api_params=api_params)
+
+    @login_required
+    def add_entry(self, body, embed=None):
+        """Dodanie nowego wpisu.
+        
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :type body: str
+        :type embed: file, str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def edit_entry(self, entry_id, body, embed=None):
+        """Edycja wpisu.
+        
+        :param entry_id: id wpisu
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :type entry_id: int
+        :type body: str
+        :type embed: file, str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_up_entry(self, entry_id):
+        """Plusowanie wpisu.
+        
+        :param entry_id: id wpisu
+        :type entry_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_remove_entry(self, entry_id):
+        """Zgłoszenie wpisu.
+        
+        :param entry_id: id wpisu
+        :type entry_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def delete_entry(self, entry_id):
+        """Usunięcie wpisu.
+        
+        :param entry_id: id wpisu
+        :type entry_id: int
+        """
+        raise NotImplementedError
+
+    def get_entry_comment(self, entry_comment_id):
+        """Pobranie pojedyńczego komentarza do wpisu.
+        
+        :param entry_comment_id: id wpisu
+        :type entry_comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def add_entry_comment(self, entry_id, body, embed=None):
+        """Dodanie nowego komentarza do wpisu.
+        
+        :param entry_id: id wpisu
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :type entry_id: int
+        :type body: str
+        :type embed: file, str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def edit_entry_comment(self, body, embed=None):
+        """Edycja komentarza do wpisu.
+        
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :type body: str
+        :type embed: file, str
+        """
+        raise NotImplementedError
+
+    @login_required
+    def delete_entry_comment(self, entry_comment_id):
+        """Usunięcie komentarza do wpisu.
+        
+        :param entry_comment_id: id wpisu
+        :type entry_comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_up_entry_comment(self, entry_comment_id):
+        """Plusowanie komentarza do wpisu.
+        
+        :param entry_comment_id: id wpisu
+        :type entry_comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_remove_entry_comment(self, entry_comment_id):
+        """Zgłoszenie komentarza do wpisu.
+        
+        :param entry_comment_id: id wpisu
+        :type entry_comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def set_favorite_entry(self, entry_id):
+        """Oznaczenie/odznaczenie wpisu jako ulubiony.
+        
+        :param entry_id: id wpisu
+        :type entry_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_survey_entry(self, entry_id, survey_id):
+        """Zagłosowanie w ankiecie do wpisu.
+        
+        :param entry_id: id wpisu
+        :param survey_id: id ankiety
+        :type entry_id: int
+        :type survey_id: int
+        """
+        raise NotImplementedError
+
+    # hits
+
+    def get_hits_popular(self):
+        """Pobranie listy popularnych znalezisk."""
+        return self.request('hits', 'popular')
+
+    def get_hits_day(self):
+        """Pobranie listy najlepszych znalezisk dnia."""
+        return self.request('hits', 'day')
+
+    def get_hits_week(self):
+        """Pobranie listy najlepszych znalezisk tygodnia."""
+        return self.request('hits', 'week')
+
+    def get_hits_month(self, year=None, month=None, page=1):
+        """Pobranie listy najlepszych znalezisk miesiąca.
+        
+        :param year: rok (domyślnie aktualny)
+        :param month: miesiąc (domyślnie aktualny)
+        :param page: strona
+        :type year: int
+        :type month: int
+        :type page: int
+        """
+        api_params = {}
+
+        if year and month:
+            api_params.update({
+                str(year): month,
+            })
+
+        if page:
+            api_params.update({
+                'page': page,
+            })
+        return self.request('hits', 'month', api_params=api_params)
+
+    def get_hits_year(self, year=None):
+        """Pobranie listy najlepszych znalezisk roku.
+        
+        :param year: rok (domyślnie aktualny)
+        :type year: int
+        """
+        api_params = {}
+
+        if year and month:
+            api_params.update({
+                str(year): month,
+            })
+
+        return self.request('hits', 'week', api_params=api_params)
+
     # links
 
     def get_links_promoted(self, page=1):
+        """Pobranie listy promowanych znalezisk.
+        
+        :param page: strona
+        :type page: int
+        """
         api_params = {
             'page': page,
         }
         return self.request('links', 'promoted', api_params=api_params)
 
     def get_links_upcoming(self, sort='active', page=1):
+        """Pobranie listy znalezisk z wykopaliska.
+        
+        :param sort: sortowanie (active, date, votes lub comments)
+        :param page: strona
+        :type sort: str
+        :type page: int
+        """
         assert sort in ['active', 'date', 'votes', 'comments']
         api_params = {
             'sort': sort,
@@ -173,7 +445,108 @@ class WykopAPIv2(BaseWykopAPIv2):
         }
         return self.request('links', 'upcoming', api_params=api_params)
 
+    @login_required
+    def get_links_observed(self, page=1):
+        """Pobranie obserwowanych znalezisk z wszystkich list.
+        
+        :param page: strona
+        :type page: int
+        """
+        api_params = {
+            'page': page,
+        }
+        return self.request('links', 'observed', api_params=api_params)
+
+    def get_link(self, link_id, with_comments=False):
+        """Pobranie pojedyńczego znaleziska.
+        
+        :param link_id: id znaleziska
+        :param with_comments: pobranie listy komentarzy ze znaleziskiem
+        :type link_id: int
+        :type with_comments: bool
+        """
+        api_params = {
+            'id': link_id,
+        }
+        return self.request('links', 'link', api_params=api_params)
+
+    @login_required
+    def vote_up_link(self, link_id):
+        """Wykopanie znaleziska.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_remove_link(self, link_id):
+        """Zgłoszenie znaleziska.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_down_link(self, link_id, vote_type):
+        """Zakopanie znaleziska.
+        
+        :param link_id: id znaleziska
+        :param vote_type: powód zakopania (1-duplikat, 2-spam, 3-informacja nieprawdziwa, 4-treść nieodpowiednia, 5-nie nadaje się)
+        :type link_id: int
+        :type vote_type: int
+        """
+        raise NotImplementedError
+
+    def get_link_upvoters(self, link_id):
+        """Pobranie listy wykopujących.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
+        api_params = {
+            'upvoters': link_id,
+        }
+        return self.request('links', api_params=api_params)
+
+    def get_link_downvoters(self, link_id):
+        """Pobranie listy zakopujących.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
+        api_params = {
+            'downvoters': link_id,
+        }
+        return self.request('links', api_params=api_params)
+
+    def get_top_links(self, year, month=None):
+        """Pobranie listy najlepszych znalezisk.
+        
+        :param year: rok
+        :param month: miesiąc
+        :type year: int
+        :type month: int
+        """
+        api_params = {
+            'year': year,
+        }
+
+        if month:
+            api_params.update({
+                'month': month,
+            })
+        return self.request('links', 'top', api_params=api_params)
+
     def get_link_comments(self, link_id, sort='old'):
+        """Pobranie listy komentarzy do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param sort: sortowanie (old, new lub best)
+        :type link_id: int
+        :type sort: str
+        """
         assert sort in ['old', 'new', 'best']
         api_params = {
             'comments': link_id,
@@ -181,23 +554,116 @@ class WykopAPIv2(BaseWykopAPIv2):
         }
         return self.request('links', api_params=api_params)
 
+    @login_required
+    def vote_up_link_comment(self, link_id, comment_id):
+        """Plusowanie komentarza do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param comment_id: id komentarza
+        :type link_id: int
+        :type comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_down_link_comment(self, link_id, comment_id):
+        """Minusowanie komentarza do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param comment_id: id komentarza
+        :type link_id: int
+        :type comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def vote_cancel_link_comment(self, link_id, comment_id):
+        """Cofnięcie plusa/minusa komentarza do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param comment_id: id komentarza
+        :type link_id: int
+        :type comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def add_link_comment(self, link_id, body, embed=None, comment_id=None):
+        """Dodanie komentarza do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :param comment_id: id komentarza (jeżeli odpowiedź do komentarza)
+        :type link_id: int
+        :type body: str
+        :type embed: file, str
+        :type comment_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def edit_link_comment(self, comment_id, body, embed=None):
+        """Edycja komentarza do znaleziska.
+        
+        :param comment_id: id komentarza
+        :param body: treść
+        :param embed: załącznik w formie obrazka lub linku
+        :type comment_id: int
+        :type body: str
+        :type embed: file, str
+        """
+        raise NotImplementedError
+
+    def get_link_comment(self, comment_id):
+        """Pobranie pojedyńczego komentarza do znaleziska.
+        
+        :param comment_id: id komentarza
+        :type comment_id: int
+        """
+        raise NotImplementedError
+
     def get_link_related(self, link_id):
+        """Pobranie listy powiązanych do znaleziska.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
         api_params = {
             'related': link_id,
         }
         return self.request('links', api_params=api_params)
 
-    def get_link_upvoters(self, link_id):
-        api_params = {
-            'upvoters': link_id,
-        }
-        return self.request('links', api_params=api_params)
+    @login_required
+    def vote_up_link_related(self, link_id, related_link_id):
+        """Plusowanie powiązanego linku do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param related_link_id: id powiązanego linku do znaleziska
+        :type link_id: int
+        :type related_link_id: int
+        """
+        raise NotImplementedError
 
-    def get_link_downvoters(self, link_id):
-        api_params = {
-            'downvoters': link_id,
-        }
-        return self.request('links', api_params=api_params)
+    @login_required
+    def vote_down_link_related(self, link_id, related_link_id):
+        """Minusowanie powiązanego linku do znaleziska.
+        
+        :param link_id: id znaleziska
+        :param related_link_id: id powiązanego linku do znaleziska
+        :type link_id: int
+        :type related_link_id: int
+        """
+        raise NotImplementedError
+
+    @login_required
+    def set_favorite_link(self, link_id):
+        """Oznaczenie/odznaczenie znaleziska jako ulubiony.
+        
+        :param link_id: id znaleziska
+        :type link_id: int
+        """
+        raise NotImplementedError
 
     # mywykop
 
@@ -268,18 +734,6 @@ class WykopAPIv2(BaseWykopAPIv2):
             'unblock': username,
         }
         return self.request('profiles', api_params=api_params)
-
-    # hits
-
-    def get_hits_month(self, year, month, page=1):
-        api_params = {
-            str(year): month,
-            'page': page,
-        }
-        return self.request('hits', 'month', api_params=api_params)
-
-    def get_hits_popular(self):
-        return self.request('hits', 'popular')
 
     # pm
 
